@@ -1,0 +1,3956 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>猜猜我是誰：國考複習</title>
+<style>
+:root{
+  --bg:#F7F5F0;--card:#FFFFFF;--ink:#2B2B33;--muted:#6B6B76;--line:#EEEAE2;--edge:#CFCAC0;--track:#E6E2D8;
+  --primary:#2F6F8F;--primary-soft:#E6F0F4;
+  --gold:#B7791F;--gold-soft:#FBF1DC;
+  --good:#2E6B47;--good-bg:#E7F3EC;--bad:#B4533F;--bad-bg:#FBEDE8;
+}
+*{box-sizing:border-box}
+body{margin:0;min-height:100vh;overflow-x:hidden;background:var(--bg);color:var(--ink);font-family:"Noto Sans TC","PingFang TC","Microsoft JhengHei",sans-serif;line-height:1.7}
+main{max-width:680px;margin:0 auto;padding:24px 16px 64px;position:relative;z-index:1}
+h1{font-size:24px;margin:0 0 4px;font-weight:700}
+h2{font-size:18px;margin:0 0 10px;font-weight:700}
+p{margin:0 0 10px}
+.muted{color:var(--muted);font-size:14px}
+.card{background:var(--card);border-radius:14px;padding:16px 18px;margin:14px 0}
+button{font:inherit;color:var(--ink);background:var(--card);border:1px solid var(--edge);border-radius:10px;padding:9px 14px;cursor:pointer;transition:transform .1s,border-color .15s}
+button:hover{border-color:var(--primary)}
+button:active{transform:scale(.97)}
+button.primary{background:var(--primary);color:#fff;border-color:var(--primary);font-weight:700;padding:10px 20px}
+button:disabled{cursor:default;color:var(--muted);background:#F3F1EC;border-color:var(--line)}
+.row{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.hud{display:flex;justify-content:space-between;align-items:center;gap:8px;font-size:13px;color:var(--muted);margin-bottom:8px;flex-wrap:wrap}
+.pill{display:inline-flex;align-items:center;gap:4px;padding:2px 4px}
+.pill.star{color:var(--gold);font-weight:700;font-size:15px}
+.pill.quit{border:1px solid var(--edge);border-radius:8px;padding:3px 10px;font-size:13px;color:var(--primary);background:var(--card)}
+.combo{color:var(--gold);font-weight:700}
+.clue{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:10px 14px;margin:8px 0;animation:pop .25s ease-out}
+.clue b{display:block;font-size:12px;color:var(--primary);font-weight:700}
+@keyframes pop{from{transform:translateY(4px);opacity:0}to{transform:none;opacity:1}}
+button.hint{font-size:14px;padding:6px 12px;color:var(--ink)}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(112px,1fr));gap:8px;margin-top:8px}
+.grid button{padding:10px 6px;font-size:15px;border-color:var(--line)}
+.grid button.wrong{background:var(--bad-bg);color:var(--bad);text-decoration:line-through;border-color:transparent}
+.grid button.sel{background:var(--primary-soft);border-color:var(--primary);color:var(--primary)}
+.opt{display:block;width:100%;text-align:left;margin:8px 0;font-size:15px;padding:11px 14px;border-color:var(--line)}
+.opt.right,.grid button.right{background:var(--good-bg);color:var(--good);border-color:var(--good)}
+.opt.wrong{background:var(--bad-bg);color:var(--bad);border-color:transparent;text-decoration:line-through}
+.msg{min-height:24px;font-size:15px;font-weight:700;margin-top:10px}
+.msg.bad,.badtxt{color:var(--bad)}
+.goodtxt{color:var(--good)}
+.reveal dt{color:var(--primary);font-size:12px;font-weight:700;margin-top:8px}
+.reveal dd{margin:0}
+.mem{background:var(--gold-soft);color:#7A5210;border-radius:10px;padding:10px 14px;margin-top:12px}
+.badge{display:inline-block;font-size:12px;padding:1px 10px;border-radius:999px;background:var(--primary-soft);color:var(--primary);margin-left:8px;vertical-align:middle;font-weight:400}
+.stampb{background:var(--gold-soft);color:#7A5210}
+.cheer{font-size:22px;font-weight:800;color:var(--gold);margin-bottom:6px;animation:bounce .5s ease-out}
+.cheer.soft{font-size:17px;color:var(--primary)}
+@keyframes bounce{0%{transform:scale(.7);opacity:0}60%{transform:scale(1.06);opacity:1}100%{transform:scale(1)}}
+.card.win{border:1.5px solid #E9C98A}
+.pts{display:flex;flex-wrap:wrap;gap:6px;margin:8px 0 4px}
+.pts span{background:var(--good-bg);color:var(--good);border-radius:999px;padding:2px 10px;font-size:13px}
+.pts .sum{background:var(--gold-soft);color:#7A5210;font-weight:700}
+.newstamp{display:inline-block;margin-top:8px;background:var(--gold-soft);color:#7A5210;font-weight:700;border-radius:999px;padding:3px 14px;animation:bounce .5s ease-out}
+.tag{display:inline-block;background:var(--primary-soft);color:var(--primary);border-radius:999px;padding:2px 12px;font-size:13px;font-weight:700}
+.bonusq{margin-top:14px;padding-top:12px;border-top:1px dashed var(--edge)}
+.bar{height:6px;background:var(--track);border-radius:999px;overflow:hidden;margin-top:6px}
+.bar i{display:block;height:100%;background:var(--primary);border-radius:999px}
+.wallet .big{font-size:22px;font-weight:800;color:var(--gold)}
+.walletline{display:flex;justify-content:space-between;align-items:baseline;gap:8px}
+table{width:100%;border-collapse:collapse;font-size:15px}
+td{padding:7px 4px;border-bottom:1px solid var(--line)}
+td:last-child{text-align:right;font-weight:700;color:var(--gold)}
+.shake{animation:shake .3s}
+@keyframes shake{25%{transform:translateX(-5px)}75%{transform:translateX(5px)}}
+.float{position:fixed;z-index:20;font-size:26px;font-weight:800;color:var(--gold);pointer-events:none;animation:floatup 1.2s ease-out forwards}
+@keyframes floatup{from{opacity:1;transform:translateY(0)}to{opacity:0;transform:translateY(-80px)}}
+#fx{position:fixed;inset:0;width:100%;height:100%;pointer-events:none;z-index:10}
+.unlock{background:var(--gold-soft);color:#7A5210}
+.savebox{background:var(--primary-soft)}
+.subject{margin-top:22px}
+.subject h2{font-size:15px;color:var(--muted);font-weight:700;margin:0 0 6px}
+.unitlist{background:var(--card);border-radius:14px;padding:2px 16px}
+.urow{display:flex;align-items:center;gap:12px;padding:12px 0;border-bottom:1px solid var(--line)}
+.urow:last-child{border-bottom:none}
+.dot{width:10px;height:10px;border-radius:50%;flex:none}
+.uinfo{flex:1;min-width:0}
+.uname{font-weight:700}
+.ucount{font-size:12px;color:var(--muted);margin-left:6px;font-weight:400}
+.urow .bar{max-width:220px}
+.modes{display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:8px;margin-top:10px}
+.modes button{text-align:left;padding:12px 14px}
+.modes button .lock{display:block;font-size:12px;color:var(--muted);font-weight:400}
+.modes .mname{font-weight:700}
+.dex{display:grid;grid-template-columns:repeat(auto-fill,minmax(128px,1fr));gap:8px;margin-top:10px}
+.dexcard{display:flex;flex-direction:column;align-items:flex-start;gap:2px;padding:10px 12px;border-radius:12px;border:2px solid var(--line);text-align:left;background:var(--card)}
+.dexcard .dname{font-weight:700;font-size:15px}.dexcard .dsub{font-size:12px;color:var(--muted)}.dexcard .dst{font-size:12px}
+.dexcard.l0{background:#F3F1EC;color:var(--muted);border-color:transparent}
+.dexcard.l1{border-color:#D9B79A}
+.dexcard.l2{border-color:#B9C2CC}
+.dexcard.l3{border-color:#E2B54F;background:#FFFBF0}
+.topbar{display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:10px}
+.who{display:flex;align-items:center;gap:8px;font-weight:700}
+.ava{width:32px;height:32px;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;font-size:17px;background:var(--card)}
+.sync{font-size:12px;color:var(--muted);font-weight:400}
+.linkbtn{font-size:13px;padding:5px 12px;color:var(--primary)}
+.soon{color:var(--muted);font-size:14px;padding:10px 16px;border:1px dashed var(--edge);border-radius:12px;margin:8px 0}
+.rank{display:flex;justify-content:space-between;align-items:center;padding:6px 2px;border-bottom:1px solid var(--line)}
+.rank.me{color:var(--primary);font-weight:700}
+.field{display:block;margin:12px 0}
+.field span{display:block;font-size:14px;color:var(--muted);margin-bottom:4px}
+.field input{width:100%;font:inherit;padding:10px 12px;border:1px solid var(--edge);border-radius:10px;background:var(--card);color:var(--ink)}
+.field input:focus{outline:none;border-color:var(--primary)}
+.err{color:var(--bad);font-size:14px;min-height:20px;margin-top:6px}
+.avas{display:flex;gap:8px;flex-wrap:wrap}
+.avas button{width:44px;height:44px;border-radius:50%;font-size:20px;padding:0}
+.avas button.on{border-color:var(--primary);background:var(--primary-soft)}
+.rules{font-size:14px;color:var(--muted)}
+.rules b{color:var(--ink)}
+.teacher{margin-top:28px;font-size:13px;color:var(--muted);text-align:center}
+.teacher .tlink{border:none;background:none;color:var(--muted);text-decoration:underline;font-size:13px;padding:2px}
+.teacher input{font:inherit;width:100px;padding:5px 8px;border:1px solid var(--edge);border-radius:8px}
+.teacher .err{display:inline;margin-left:6px}
+.grp{margin-top:20px}
+.grp h2{font-size:17px;margin:0 0 6px}
+.rule{background:var(--primary-soft);color:#24546B;border-radius:10px;padding:8px 12px;font-size:14px;margin-bottom:8px}
+.stcard{background:var(--card);border-radius:12px;padding:12px 14px;margin:8px 0;border:1px solid var(--line)}
+.stcard.closed{cursor:pointer}
+.stcard .sthead{display:flex;align-items:center;gap:6px}
+.sttoggle{margin-left:auto;font-size:12px;color:var(--primary)}
+.stcard .reveal{margin:4px 0 0}
+.lmbox{background:var(--primary-soft);border-radius:12px;padding:12px 14px;margin-top:10px}
+.lmname{font-size:18px;font-weight:700;color:#24546B}
+.lmwhere{font-size:13px;color:var(--muted);margin:2px 0 6px}
+.lmkin{font-size:15px}
+.lmrow{padding:8px 0;border-top:1px solid rgba(47,111,143,.15)}
+.lmrow:first-of-type{border-top:none}
+.lmdir{font-size:15px}
+.lmicon{display:inline-block;width:26px}
+.lmmus{margin:6px 0 0 26px;display:flex;flex-wrap:wrap;gap:6px;align-items:center}
+.mchip{background:var(--card);border:1px solid var(--edge);border-radius:999px;padding:1px 12px;font-size:14px;font-weight:700}
+.mchip.q{color:var(--muted);font-weight:400;min-width:36px;text-align:center}
+.lmnote{font-size:12px;color:var(--muted)}
+.lmtip{margin-top:10px;padding-top:8px;border-top:1px dashed var(--edge);font-size:14px;color:#7A5210}
+</style>
+</head>
+<body>
+<canvas id="fx"></canvas>
+<main id="app"></main>
+<script>
+// 科目資料檔（data/*.js）用 registerSubject 登記自己
+const SUBJECTS = {};
+function registerSubject(id, def){ SUBJECTS[id] = def; }
+</script>
+<script>
+// ===== 雲端存檔設定 =====
+// 雲端存檔設定：把 Google Apps Script 部署後拿到的網址貼在下面的引號裡。
+// 留空白就不開啟登入，成績只存在學生自己的瀏覽器。
+const CLOUD_URL = "";
+</script>
+<!-- ===== 題目資料：之後新增科目，就在下面再加一段 registerSubject(...) ===== -->
+<script>
+// 肌肉解剖：每個單元一組題目，之後新增單元只要照同樣格式加在 units 裡。
+// values 的順序對應 fields：起點、止點、肌群、神經、動作。
+registerSubject("anatomy", {
+  name: "肌肉解剖",
+  icon: "💪",
+  theme: ["#ff5d8f", "#ff9f1c"],
+  noun: "肌肉",
+  measure: "條",         // 量詞：一條肌肉
+  fields: [
+    { label: "起點", clue: "我的起點（近端連接處）在{v}" },
+    { label: "止點", clue: "我的止點（遠端連接處）在{v}" },
+    { label: "肌群", clue: "我屬於{v}" },
+    { label: "神經", clue: "支配我的神經是{v}" },
+    { label: "動作", clue: "我的動作：{v}" }
+  ],
+  firstClues: [2, 0],    // 一般模式開局先給肌群、再給起點，學生先有整體感
+  order: [2, 0, 1, 3, 4], // 線索與卡片的顯示順序：肌群、起點、止點、神經、動作
+  hardFirstClues: [3, 4], // 困難模式：肌群之後，改從神經或動作開始
+  groupField: 2,         // 「肌群」用來出肌群關
+  keyField: 3,           // 「神經」用來出「哪一條不一樣」
+  bonusOrder: [3, 1, 0, 4],
+  lockedModes: [
+    { icon: "📝", name: "國考實戰", need: 3 }
+  ],
+  units: {
+  "head": {
+    "name": "頭頸部",
+    "desc": "咀嚼肌、表情肌、眼外肌、舌肌、舌骨上下肌、胸鎖乳突肌與斜角肌，共 36 條",
+    "items": [
+      {
+        "name": "咬肌",
+        "values": [
+          "顴弓",
+          "下頜枝外面與下頜角",
+          "咀嚼肌",
+          "三叉神經下頜支（V3）",
+          "用力咬緊牙齒、嚼口香糖時，把下巴往上拉（上提下頜）"
+        ],
+        "memo": "咬牙時摸臉頰外側，鼓起來的就是我"
+      },
+      {
+        "name": "顳肌",
+        "values": [
+          "顳窩（太陽穴）",
+          "下頜骨冠狀突",
+          "咀嚼肌",
+          "三叉神經下頜支（V3）",
+          "咬牙時把下巴往上拉（上提下頜）；後面的纖維還能把往前突出的下巴拉回來（下頜後縮）"
+        ],
+        "memo": "太陽穴的扇形肌肉；「下頜後縮」題目的答案就是我"
+      },
+      {
+        "name": "翼內肌",
+        "values": [
+          "蝶骨翼突外側板的內面",
+          "下頜枝內面與下頜角",
+          "咀嚼肌",
+          "三叉神經下頜支（V3）",
+          "咬緊牙齒（上提下頜），吃東西時讓下巴左右磨"
+        ],
+        "memo": "咬肌在外、我在內，一起夾住下頜角"
+      },
+      {
+        "name": "翼外肌",
+        "values": [
+          "蝶骨翼突外側板的外面",
+          "下頜頸與顳下頜關節的關節盤",
+          "咀嚼肌",
+          "三叉神經下頜支（V3）",
+          "打哈欠、張大嘴巴咬漢堡（下拉下頜，也就是開口），也能把下巴往前推（前伸）"
+        ],
+        "memo": "咀嚼肌「三閉一開」，唯一開口的就是我"
+      },
+      {
+        "name": "口輪匝肌",
+        "values": [
+          "環繞嘴唇一圈，沒有明顯的骨性起點",
+          "嘴唇周圍的皮膚",
+          "表情肌",
+          "顏面神經（VII）",
+          "閉上嘴巴、嘟嘴、吹口哨"
+        ],
+        "memo": "「輪匝」就是一圈：環繞嘴巴的環狀肌"
+      },
+      {
+        "name": "頰肌",
+        "values": [
+          "上、下頜骨後段的外側",
+          "口角",
+          "表情肌",
+          "顏面神經（VII）",
+          "鼓起臉頰吹氣球、吹喇叭；吃飯時把食物推回牙齒之間"
+        ],
+        "memo": "附著下頜骨卻不是咀嚼肌，屬顏面神經，常當陷阱選項"
+      },
+      {
+        "name": "眼輪匝肌",
+        "values": [
+          "眼眶內側的骨頭（額骨、上頜骨）與內眥韌帶",
+          "繞眼眶與眼瞼一圈，回到起點附近",
+          "表情肌",
+          "顏面神經（VII）",
+          "閉上眼睛、用力擠眼睛"
+        ],
+        "memo": "「輪匝」就是一圈：環繞眼睛的環狀肌；名字不像，但它是表情肌（考過）"
+      },
+      {
+        "name": "枕額肌",
+        "values": [
+          "枕骨上項線（枕腹）",
+          "經帽狀腱膜，連到眉毛上方的皮膚（額腹）",
+          "表情肌",
+          "顏面神經（VII）",
+          "抬眉毛、皺額頭，做出驚訝的表情"
+        ],
+        "memo": "前後兩個肌腹靠頭頂的帽狀腱膜相連"
+      },
+      {
+        "name": "顴大肌",
+        "values": [
+          "顴骨",
+          "嘴角",
+          "表情肌",
+          "顏面神經（VII）",
+          "把嘴角往上、往外拉，露出笑容"
+        ],
+        "memo": "笑的時候從顴骨把嘴角拉上去"
+      },
+      {
+        "name": "提上唇肌",
+        "values": [
+          "眼眶下緣（上頜骨）",
+          "上唇",
+          "表情肌",
+          "顏面神經（VII）",
+          "把上唇往上提，露出上排牙齒"
+        ],
+        "memo": "名字就是動作：「提」起「上唇」；和口輪匝肌相反，是把嘴唇拉開"
+      },
+      {
+        "name": "降下唇肌",
+        "values": [
+          "下頜骨前面",
+          "下唇",
+          "表情肌",
+          "顏面神經（VII）",
+          "把下唇往下、往外拉，露出下排牙齒"
+        ],
+        "memo": "名字就是動作：「降」低「下唇」"
+      },
+      {
+        "name": "頦肌",
+        "values": [
+          "下頜骨門牙下方",
+          "下巴的皮膚",
+          "表情肌",
+          "顏面神經（VII）",
+          "把下巴皮膚往上推、讓下唇往前翹（想哭時皺下巴）"
+        ],
+        "memo": "下巴皺成「核桃皮」就是我在用力"
+      },
+      {
+        "name": "頸闊肌",
+        "values": [
+          "鎖骨下方、胸大肌與三角肌上面的筋膜",
+          "下頜骨下緣與嘴角的皮膚",
+          "表情肌",
+          "顏面神經（VII）",
+          "繃緊頸部皮膚、把嘴角往下拉（驚嚇時脖子浮出條紋）"
+        ],
+        "memo": "長在頸部皮下，卻是表情肌，所以由顏面神經支配"
+      },
+      {
+        "name": "上直肌",
+        "values": [
+          "眼眶後方的總腱環",
+          "眼球上面",
+          "眼外肌",
+          "動眼神經（III）",
+          "眼球往上轉（往上看）"
+        ],
+        "memo": "四條直肌都從眼窩深處的總腱環出發"
+      },
+      {
+        "name": "下直肌",
+        "values": [
+          "眼眶後方的總腱環",
+          "眼球下面",
+          "眼外肌",
+          "動眼神經（III）",
+          "眼球往下轉（往下看）"
+        ],
+        "memo": "和上直肌一上一下，都是動眼神經"
+      },
+      {
+        "name": "內直肌",
+        "values": [
+          "眼眶後方的總腱環",
+          "眼球內側（靠鼻子那側）",
+          "眼外肌",
+          "動眼神經（III）",
+          "眼球往內轉（看自己的鼻尖）"
+        ],
+        "memo": "和外直肌一內一外，但神經不同"
+      },
+      {
+        "name": "外直肌",
+        "values": [
+          "眼眶後方的總腱環",
+          "眼球外側（靠耳朵那側）",
+          "眼外肌",
+          "外展神經（VI）",
+          "眼球往外轉（往耳朵方向看）"
+        ],
+        "memo": "口訣「外 6 上斜 4，其餘 3」：外直肌是第 6 對腦神經"
+      },
+      {
+        "name": "上斜肌",
+        "values": [
+          "眼眶後方的蝶骨（總腱環上內側）",
+          "肌腱繞過眼眶內上角的滑車，再連到眼球上外側後方",
+          "眼外肌",
+          "滑車神經（IV）",
+          "眼球往下、往外轉（下樓梯時往下看）"
+        ],
+        "memo": "肌腱繞過「滑車」，所以神經叫滑車神經（第 4 對）"
+      },
+      {
+        "name": "下斜肌",
+        "values": [
+          "眼眶底的前內側（上頜骨）",
+          "眼球外側後方",
+          "眼外肌",
+          "動眼神經（III）",
+          "眼球往上、往外轉"
+        ],
+        "memo": "不從總腱環出發，而是從眼眶底前方出發"
+      },
+      {
+        "name": "提上瞼肌",
+        "values": [
+          "眼眶後方的蝶骨小翼",
+          "上眼瞼",
+          "眼外肌",
+          "動眼神經（III）",
+          "抬起上眼皮（睜眼）"
+        ],
+        "memo": "動眼神經受損時抬不起眼皮，造成眼瞼下垂（考過）"
+      },
+      {
+        "name": "頦舌肌",
+        "values": [
+          "下頜骨的頦棘",
+          "舌頭",
+          "舌外肌",
+          "舌下神經（XII）",
+          "對人吐舌頭做鬼臉（伸舌）"
+        ],
+        "memo": "從頦（下巴）拉到舌頭，收縮時把舌頭往前推出去"
+      },
+      {
+        "name": "舌骨舌肌",
+        "values": [
+          "舌骨",
+          "舌頭側面",
+          "舌外肌",
+          "舌下神經（XII）",
+          "說「啊」時把舌頭往下壓低（下壓舌）"
+        ],
+        "memo": "從舌骨到舌：名字就是答案；我不動下頜"
+      },
+      {
+        "name": "莖突舌肌",
+        "values": [
+          "顳骨莖突",
+          "舌頭側面",
+          "舌外肌",
+          "舌下神經（XII）",
+          "把舌頭往後、往上拉，吞嚥時把食物往後送"
+        ],
+        "memo": "和莖突舌骨肌只差一個「骨」字：我拉舌頭，它拉舌骨"
+      },
+      {
+        "name": "腭舌肌",
+        "values": [
+          "軟腭",
+          "舌頭側面後部",
+          "舌外肌",
+          "迷走神經（X）",
+          "把舌根往上提，讓口腔後方變窄（吞嚥）"
+        ],
+        "memo": "舌肌裡的例外：不是舌下神經，而是迷走神經"
+      },
+      {
+        "name": "二腹肌",
+        "values": [
+          "前腹：下頜骨；後腹：顳骨乳突",
+          "中間腱固定在舌骨",
+          "舌骨上肌",
+          "兩條：前腹是三叉神經（V3），後腹是顏面神經（VII）",
+          "吞口水時把舌骨往上提（上提舌骨）；舌骨固定時幫忙張嘴"
+        ],
+        "memo": "兩個肚子、兩條神經：前腹 V3、後腹 VII",
+        "mixedKey": true
+      },
+      {
+        "name": "莖突舌骨肌",
+        "values": [
+          "顳骨莖突",
+          "舌骨",
+          "舌骨上肌",
+          "顏面神經（VII）",
+          "吞嚥時把舌骨往上、往後拉（上提舌骨）"
+        ],
+        "memo": "從莖突到舌骨：名字就是答案；「上提舌骨」是複習重點"
+      },
+      {
+        "name": "下頜舌骨肌",
+        "values": [
+          "下頜骨內面",
+          "舌骨",
+          "舌骨上肌",
+          "三叉神經下頜支（V3）",
+          "吞嚥時把口腔底部和舌骨往上撐（上提舌骨）"
+        ],
+        "memo": "口腔的地板；雖然是舌骨上肌，卻跟咀嚼肌一樣由 V3 支配"
+      },
+      {
+        "name": "頦舌骨肌",
+        "values": [
+          "下頜骨的頦棘",
+          "舌骨",
+          "舌骨上肌",
+          "C1 頸神經（神經纖維搭著舌下神經走）",
+          "吞嚥時把舌骨往前上方拉（上提舌骨）"
+        ],
+        "memo": "舌骨上肌裡唯一由頸神經支配；名字跟頦舌肌只差一個「骨」字"
+      },
+      {
+        "name": "胸骨舌骨肌",
+        "values": [
+          "胸骨柄",
+          "舌骨",
+          "舌骨下肌",
+          "頸襻（C1～C3）",
+          "吞完口水後，把往上跑的舌骨拉回原位（下壓舌骨）"
+        ],
+        "memo": "從胸骨到舌骨：名字就是答案"
+      },
+      {
+        "name": "胸骨甲狀肌",
+        "values": [
+          "胸骨柄後面",
+          "甲狀軟骨",
+          "舌骨下肌",
+          "頸襻（C1～C3）",
+          "吞嚥完把喉頭往下拉回原位（下壓喉）"
+        ],
+        "memo": "舌骨下肌裡不連到舌骨的那條；在胸骨舌骨肌的深層"
+      },
+      {
+        "name": "甲狀舌骨肌",
+        "values": [
+          "甲狀軟骨（喉結）",
+          "舌骨",
+          "舌骨下肌",
+          "C1 頸神經（神經纖維搭著舌下神經走）",
+          "把舌骨往下拉（下壓舌骨）；舌骨固定時，把喉結往上提（上提喉）"
+        ],
+        "memo": "舌骨下肌裡的例外：不走頸襻，而是 C1 搭舌下神經"
+      },
+      {
+        "name": "肩胛舌骨肌",
+        "values": [
+          "肩胛骨上緣",
+          "舌骨",
+          "舌骨下肌",
+          "頸襻（C1～C3）",
+          "吞嚥後把舌骨拉回原位（下壓舌骨）"
+        ],
+        "memo": "從肩胛骨一路跑到舌骨，最遠的一條帶狀肌；下腹經過後頸三角"
+      },
+      {
+        "name": "胸鎖乳突肌",
+        "values": [
+          "胸骨柄與鎖骨內側",
+          "顳骨乳突",
+          "頸部肌肉",
+          "副神經（XI）",
+          "把臉轉向右邊時，左邊這條會浮起來（單側收縮：臉轉向對側）；低頭點頭（兩側一起收縮：屈頸）；用力吸氣時上提胸骨"
+        ],
+        "memo": "名字就是附著點：胸骨、鎖骨、乳突；頭固定時我會上提胸骨，不是下壓"
+      },
+      {
+        "name": "前斜角肌",
+        "values": [
+          "第 3～6 頸椎橫突的前結節",
+          "第 1 肋骨（斜角肌結節）",
+          "頸部肌肉",
+          "頸神經前支（C4～C6）",
+          "用力深吸氣時把第 1 肋往上提（上提肋骨），也讓頸部往側邊彎"
+        ],
+        "memo": "前、中斜角肌之間的間隙，有臂神經叢和鎖骨下動脈通過（考過）；膈神經貼在我的前面往下走"
+      },
+      {
+        "name": "中斜角肌",
+        "values": [
+          "第 2～7 頸椎橫突的後結節",
+          "第 1 肋骨上面",
+          "頸部肌肉",
+          "頸神經前支（C3～C8）",
+          "用力深吸氣時把第 1 肋往上提（上提肋骨），也讓頸部往側邊彎"
+        ],
+        "memo": "三條斜角肌裡最大的一條；是斜角肌間隙的後界"
+      },
+      {
+        "name": "後斜角肌",
+        "values": [
+          "第 4～6 頸椎橫突的後結節",
+          "第 2 肋骨外面",
+          "頸部肌肉",
+          "頸神經前支（C6～C8）",
+          "用力深吸氣時把第 2 肋往上提（上提肋骨），也讓頸部往側邊彎"
+        ],
+        "memo": "三條斜角肌裡唯一止在第 2 肋的"
+      }
+    ],
+    "theme": [
+      "#ff5d8f",
+      "#ff9f1c"
+    ],
+    "landmarks": [
+      {
+        "name": "下頜骨冠狀突",
+        "where": "下頜枝前上方的尖角，藏在顴弓底下",
+        "blocks": [
+          {
+            "icon": "⬆️",
+            "dir": "從上方的太陽穴往上拉",
+            "act": "把下巴往上提、咬緊（上提下頜）",
+            "m": []
+          },
+          {
+            "icon": "⬅️",
+            "dir": "後面的纖維往後拉",
+            "act": "把往前突出的下巴拉回來（下頜後縮）",
+            "m": [
+              "顳肌"
+            ]
+          }
+        ],
+        "answers": [
+          "顳肌"
+        ]
+      },
+      {
+        "name": "下頜角與下頜枝",
+        "where": "耳朵下方、下巴的轉角",
+        "blocks": [
+          {
+            "icon": "⬆️",
+            "dir": "從外面往上吊（從顴弓下來）",
+            "act": "咬緊牙齒（上提下頜）",
+            "m": [
+              "咬肌"
+            ]
+          },
+          {
+            "icon": "⬆️",
+            "dir": "從裡面往上吊（從翼突下來）",
+            "act": "咬緊牙齒、左右磨",
+            "m": [
+              "翼內肌"
+            ]
+          }
+        ],
+        "answers": [
+          "咬肌",
+          "翼內肌"
+        ],
+        "tip": "一外一內夾住下頜角，像吊床的兩條繩子"
+      },
+      {
+        "name": "舌骨（從上方拉）",
+        "where": "下巴和喉結之間那塊 U 形小骨，吞口水時會往上跑",
+        "blocks": [
+          {
+            "icon": "⬆️",
+            "dir": "從舌骨上方往上拉",
+            "act": "吞嚥時把舌骨往上提（上提舌骨）",
+            "m": [
+              "二腹肌",
+              "莖突舌骨肌",
+              "下頜舌骨肌",
+              "頦舌骨肌"
+            ],
+            "note": "合稱舌骨上肌"
+          }
+        ],
+        "answers": [
+          "二腹肌",
+          "莖突舌骨肌",
+          "下頜舌骨肌",
+          "頦舌骨肌"
+        ],
+        "tip": "「上提舌骨」是複習重點",
+        "ask": "哪些舌骨上肌能幫忙把舌骨往上提？（請全部選出來）"
+      },
+      {
+        "name": "舌骨（從下方拉）",
+        "where": "同一塊舌骨，這次看它的下方",
+        "blocks": [
+          {
+            "icon": "⬇️",
+            "dir": "從舌骨下方往下拉",
+            "act": "吞完口水後把舌骨拉回原位（下壓舌骨）",
+            "m": [
+              "胸骨舌骨肌",
+              "甲狀舌骨肌",
+              "肩胛舌骨肌"
+            ],
+            "note": "同屬舌骨下肌"
+          }
+        ],
+        "answers": [
+          "胸骨舌骨肌",
+          "甲狀舌骨肌",
+          "肩胛舌骨肌"
+        ],
+        "ask": "哪些直接連到舌骨的舌骨下肌，能把舌骨往下拉？（請全部選出來）"
+      },
+      {
+        "name": "下頜骨頦棘",
+        "where": "下巴內側正中央的小突起",
+        "blocks": [
+          {
+            "icon": "➡️",
+            "dir": "往後鑽進舌頭",
+            "act": "把舌頭推出去（伸舌）",
+            "m": [
+              "頦舌肌"
+            ]
+          },
+          {
+            "icon": "➡️",
+            "dir": "往後下連到舌骨",
+            "act": "把舌骨往前上拉（上提舌骨）",
+            "m": [
+              "頦舌骨肌"
+            ]
+          }
+        ],
+        "answers": [
+          "頦舌肌",
+          "頦舌骨肌"
+        ],
+        "tip": "兩個名字只差一個「骨」字"
+      },
+      {
+        "name": "顳骨乳突",
+        "where": "耳垂後方摸得到的骨頭突起",
+        "blocks": [
+          {
+            "icon": "↗️",
+            "dir": "從胸骨、鎖骨往上拉到乳突",
+            "act": "臉轉向對側、低頭（屈頸）",
+            "m": [
+              "胸鎖乳突肌"
+            ]
+          },
+          {
+            "icon": "↘️",
+            "dir": "從乳突往前下連到舌骨",
+            "act": "上提舌骨",
+            "m": [
+              "二腹肌"
+            ],
+            "note": "二腹肌的後腹"
+          }
+        ],
+        "answers": [
+          "胸鎖乳突肌",
+          "二腹肌"
+        ]
+      },
+      {
+        "name": "第 1、2 肋骨",
+        "where": "鎖骨下方最上面的兩根肋骨",
+        "blocks": [
+          {
+            "icon": "⬆️",
+            "dir": "從頸椎往下拉住肋骨",
+            "act": "用力吸氣時把肋骨往上提（上提肋骨）",
+            "m": [
+              "前斜角肌",
+              "中斜角肌",
+              "後斜角肌"
+            ],
+            "note": "前、中止在第 1 肋，後斜角肌止在第 2 肋"
+          }
+        ],
+        "answers": [
+          "前斜角肌",
+          "中斜角肌",
+          "後斜角肌"
+        ],
+        "tip": "前、中斜角肌之間有臂神經叢通過（考過）",
+        "ask": "哪些斜角肌連到第 1 或第 2 肋骨？（請全部選出來）"
+      }
+    ]
+  },
+  "trunk": {
+    "name": "軀幹",
+    "desc": "背部、胸壁、呼吸肌、腹壁、後腹壁、骨盆底，共 32 條",
+    "theme": [
+      "#8338ec",
+      "#c13584"
+    ],
+    "items": [
+      {
+        "name": "斜方肌",
+        "values": [
+          "枕骨上項線、項韌帶、頸椎與胸椎棘突",
+          "鎖骨外 1/3、肩峰、肩胛棘",
+          "背部淺層",
+          "副神經（XI）",
+          "聳肩說「我不知道」（上提肩胛）；抬頭挺胸，把兩側肩胛骨往中間夾（後縮）"
+        ],
+        "memo": "背上少數由腦神經支配的肌肉；止點交棒給三角肌"
+      },
+      {
+        "name": "闊背肌",
+        "values": [
+          "下胸椎與腰椎棘突、胸腰筋膜、髂嵴、下位肋骨",
+          "肱骨結節間溝",
+          "背部淺層",
+          "胸背神經",
+          "拉單槓、游泳划水時，把手臂往下往後拉（伸展＋內收＋內旋上臂）"
+        ],
+        "memo": "神經是胸背神經，不是肩胛背神經（考過）；也是聽診三角的邊界"
+      },
+      {
+        "name": "大、小菱形肌",
+        "values": [
+          "第 7 頸椎到第 5 胸椎的棘突",
+          "肩胛骨內側緣",
+          "背部淺層",
+          "肩胛背神經",
+          "抬頭挺胸，把兩側肩胛骨往脊椎夾緊（肩胛後縮）"
+        ],
+        "memo": "只連脊椎和肩胛骨，不連肱骨（考過）；小菱形肌不是聽診三角的邊界（考過）"
+      },
+      {
+        "name": "提肩胛肌",
+        "values": [
+          "上 4 個頸椎的橫突",
+          "肩胛骨上角及內側緣上部",
+          "背部淺層",
+          "肩胛背神經",
+          "揹很重的書包時，把肩胛骨往上提（上提肩胛）"
+        ],
+        "memo": "名字就是動作：「提」起「肩胛」"
+      },
+      {
+        "name": "豎脊肌",
+        "values": [
+          "薦骨、髂嵴、腰椎棘突（共同腱）",
+          "分三柱往上，止於肋骨、頸胸椎與枕骨",
+          "背部深層",
+          "脊神經後支",
+          "彎腰撿東西之後，把身體挺直站起來（伸展軀幹）"
+        ],
+        "memo": "由外向內三柱：「髂肋、最長、棘」；軀幹伸展的主力（考過）"
+      },
+      {
+        "name": "半棘肌",
+        "values": [
+          "胸椎與下位頸椎的橫突",
+          "上方 4～6 節的棘突、枕骨（頭半棘肌）",
+          "背部深層",
+          "脊神經後支",
+          "抬頭往上看，把頭頸和上背往後仰（伸展頭頸與脊椎）"
+        ],
+        "memo": "橫突棘肌群「從橫突走到棘突」；我跨過 4～6 節，是這群裡最淺、最長的"
+      },
+      {
+        "name": "多裂肌",
+        "values": [
+          "薦骨、腰椎乳狀突、胸椎橫突、頸椎關節突",
+          "上方 2～4 節的棘突",
+          "背部深層",
+          "脊神經後支",
+          "彎腰搬東西時，一節一節穩住脊椎（穩定脊椎，協助伸展與旋轉）"
+        ],
+        "memo": "橫突棘肌群的中間層，在腰部最發達"
+      },
+      {
+        "name": "迴旋肌",
+        "values": [
+          "脊椎的橫突",
+          "上方一、兩節的椎板與棘突根部",
+          "背部深層",
+          "脊神經後支",
+          "一節一節穩住脊椎，幫忙轉身（旋轉）"
+        ],
+        "memo": "橫突棘肌群的最短層，名字就是「旋轉」"
+      },
+      {
+        "name": "胸大肌",
+        "values": [
+          "鎖骨內半、胸骨、上 6 對肋軟骨",
+          "肱骨大結節嵴",
+          "胸壁",
+          "內側與外側胸神經",
+          "給人一個大擁抱，把手臂往前、往內抱（屈曲＋內收＋內旋上臂）"
+        ],
+        "memo": "和闊背肌一樣能內收、內旋；胸大肌可幫忙把手臂往前抱，闊背肌則往後拉。"
+      },
+      {
+        "name": "胸小肌",
+        "values": [
+          "第 3～5 肋骨",
+          "肩胛骨喙突",
+          "胸壁",
+          "內側胸神經",
+          "縮肩駝背，把肩膀往前下方拉（肩胛骨下拉、前伸）"
+        ],
+        "memo": "從肋骨拉到喙突，不附著鎖骨（考過）"
+      },
+      {
+        "name": "鎖骨下肌",
+        "values": [
+          "第 1 肋骨（與肋軟骨交界處）",
+          "鎖骨中段下面",
+          "胸壁",
+          "鎖骨下神經",
+          "把鎖骨往下、往內拉，穩住鎖骨"
+        ],
+        "memo": "躲在鎖骨下面的小肌肉，名字就是位置（考過選項）"
+      },
+      {
+        "name": "前鋸肌",
+        "values": [
+          "上 8 對肋骨的外面",
+          "肩胛骨內側緣的前面",
+          "胸壁",
+          "長胸神經",
+          "出拳、推牆時把肩胛骨往前推（肩胛前伸）；手舉過頭時讓肩胛骨往上轉"
+        ],
+        "memo": "像鋸齒一樣貼在肋骨側面；長胸神經受傷，肩胛骨會翹起來變成「翼狀肩」"
+      },
+      {
+        "name": "外肋間肌",
+        "values": [
+          "上一根肋骨的下緣",
+          "下一根肋骨的上緣（纖維往前下，像手插口袋）",
+          "呼吸肌",
+          "肋間神經",
+          "吸氣時把肋骨往上提，讓胸腔變大（吸氣）"
+        ],
+        "memo": "「外」吸「內」呼：外肋間吸氣、內肋間用力呼氣"
+      },
+      {
+        "name": "內肋間肌",
+        "values": [
+          "上一根肋骨的下緣（肋骨溝）",
+          "下一根肋骨的上緣（纖維往後下，和外肋間肌交叉）",
+          "呼吸肌",
+          "肋間神經",
+          "用力吹氣球、咳嗽時把肋骨往下拉（用力呼氣）"
+        ],
+        "memo": "纖維和外肋間肌打叉；負責用力呼氣"
+      },
+      {
+        "name": "最內肋間肌",
+        "values": [
+          "上一根肋骨的下緣內面",
+          "下一根肋骨的上緣內面",
+          "呼吸肌",
+          "肋間神經",
+          "協助用力呼氣（和內肋間肌一起把肋骨往下拉）"
+        ],
+        "memo": "肋間肌由外到內：外、內、最內；肋間神經和血管走在內肋間肌和我之間"
+      },
+      {
+        "name": "橫膈",
+        "values": [
+          "劍突、下 6 對肋軟骨、腰椎（左右膈腳）",
+          "中心腱（不附著骨頭）",
+          "呼吸肌",
+          "膈神經（C3～C5）",
+          "吸氣時往下降，讓胸腔上下變長（最主要的吸氣肌）"
+        ],
+        "memo": "「3、4、5 讓橫膈活著」：膈神經來自 C3～C5（考過）；收縮讓胸腔上下徑增加（考過）"
+      },
+      {
+        "name": "腹直肌",
+        "values": [
+          "恥骨嵴、恥骨聯合",
+          "劍突、第 5～7 肋軟骨",
+          "腹壁",
+          "下胸神經前支（T7～T12）",
+          "仰臥起坐時把上半身捲起來（屈曲軀幹）"
+        ],
+        "memo": "腱劃把它分成一塊一塊的「六塊肌」，包在腹直肌鞘裡"
+      },
+      {
+        "name": "錐狀肌",
+        "values": [
+          "恥骨（恥骨聯合前方）",
+          "白線下段",
+          "腹壁",
+          "肋下神經（T12）",
+          "繃緊白線"
+        ],
+        "memo": "腹直肌下端前面的小三角形，有些人沒有"
+      },
+      {
+        "name": "腹外斜肌",
+        "values": [
+          "下 8 對肋骨的外面",
+          "白線、恥骨結節、髂嵴；下緣捲起來形成腹股溝韌帶",
+          "腹壁",
+          "下胸神經前支（T7～T12）",
+          "轉身拿後座的東西、往旁邊彎（軀幹旋轉、側屈）"
+        ],
+        "memo": "最外層，纖維像手插口袋往前下；腱膜下緣形成腹股溝韌帶（考過兩次）"
+      },
+      {
+        "name": "腹內斜肌",
+        "values": [
+          "胸腰筋膜、髂嵴、腹股溝韌帶外側",
+          "下 3～4 對肋骨、白線",
+          "腹壁",
+          "下胸神經前支（T7～T12，另有 L1）",
+          "和對側的腹外斜肌一起轉動軀幹、往旁邊彎（軀幹旋轉、側屈）"
+        ],
+        "memo": "中間層，纖維和腹外斜肌垂直"
+      },
+      {
+        "name": "腹橫肌",
+        "values": [
+          "下 6 對肋軟骨內面、胸腰筋膜、髂嵴、腹股溝韌帶",
+          "白線、恥骨",
+          "腹壁",
+          "下胸神經前支（T7～T12，另有 L1）",
+          "用力咳嗽、憋氣時把肚子往內縮（壓縮腹腔）"
+        ],
+        "memo": "最深層，纖維橫著走，像天然護腰；由淺到深「外斜、內斜、腹橫」（考過）"
+      },
+      {
+        "name": "腰大肌",
+        "values": [
+          "第 12 胸椎到第 5 腰椎的椎體與橫突",
+          "股骨小轉子",
+          "後腹壁",
+          "腰神經叢（L1～L3）",
+          "爬樓梯時把大腿往上抬（屈髖）"
+        ],
+        "memo": "和髂肌合稱髂腰肌，是最強的屈髖肌"
+      },
+      {
+        "name": "髂肌",
+        "values": [
+          "髂窩",
+          "股骨小轉子（和腰大肌一起）",
+          "後腹壁",
+          "股神經",
+          "把大腿往上抬（屈髖）"
+        ],
+        "memo": "躺在髂窩裡，名字就是起點"
+      },
+      {
+        "name": "腰方肌",
+        "values": [
+          "髂嵴後部",
+          "第 12 肋骨、腰椎橫突",
+          "後腹壁",
+          "T12～L4 脊神經前支",
+          "單側收縮讓身體往旁邊彎（側屈軀幹）"
+        ],
+        "memo": "方方正正地填在髂嵴和第 12 肋之間"
+      },
+      {
+        "name": "提肛肌",
+        "values": [
+          "恥骨後面、閉孔內肌筋膜（腱弓）、坐骨棘",
+          "會陰體、肛尾韌帶、尾骨",
+          "骨盆底與會陰",
+          "陰部神經與 S4 分支",
+          "憋住大便、咳嗽時托住骨盆裡的內臟（支撐骨盆底）"
+        ],
+        "memo": "骨盆底的吊床，由恥骨直腸肌、恥尾肌、髂尾肌組成"
+      },
+      {
+        "name": "尾骨肌",
+        "values": [
+          "坐骨棘",
+          "薦骨下端與尾骨側緣",
+          "骨盆底與會陰",
+          "薦神經前支（S4～S5）",
+          "和提肛肌一起構成骨盆底，托住骨盆內臟"
+        ],
+        "memo": "骨盆底（骨盆膈）＝提肛肌＋尾骨肌，我在後面"
+      },
+      {
+        "name": "球海綿體肌",
+        "values": [
+          "會陰體",
+          "陰莖球與海綿體（女性在陰道口周圍）",
+          "骨盆底與會陰",
+          "陰部神經",
+          "男性：把尿道最後幾滴尿擠出去、射精；女性：縮小陰道口"
+        ],
+        "memo": "男性排空尿道靠我（考過）"
+      },
+      {
+        "name": "坐骨海綿體肌",
+        "values": [
+          "坐骨支與坐骨粗隆",
+          "陰莖腳（女性為陰蒂腳）",
+          "骨盆底與會陰",
+          "陰部神經",
+          "壓住海綿體的「腳」，幫忙維持勃起"
+        ],
+        "memo": "和球海綿體肌是鄰居，常一起當選項"
+      },
+      {
+        "name": "會陰淺橫肌",
+        "values": [
+          "坐骨粗隆",
+          "會陰體",
+          "骨盆底與會陰",
+          "陰部神經",
+          "從兩側拉住會陰體，把它固定在中間"
+        ],
+        "memo": "名字就是位置：會陰「淺」層、「橫」著走"
+      },
+      {
+        "name": "會陰深橫肌",
+        "values": [
+          "坐骨支",
+          "會陰體",
+          "骨盆底與會陰",
+          "陰部神經",
+          "在深層拉住會陰體，撐住會陰"
+        ],
+        "memo": "在會陰淺橫肌的深層；淺、深兩條都橫著拉住會陰體"
+      },
+      {
+        "name": "尿道外括約肌",
+        "values": [
+          "環繞尿道（不直接附著骨頭）",
+          "回到尿道周圍（環狀）",
+          "骨盆底與會陰",
+          "陰部神經",
+          "憋尿：可以自己控制什麼時候排尿"
+        ],
+        "memo": "可以自己控制的尿道開關"
+      },
+      {
+        "name": "肛門外括約肌",
+        "values": [
+          "尾骨與肛尾韌帶（後方）",
+          "會陰體（前方），中間環繞肛門",
+          "骨盆底與會陰",
+          "陰部神經",
+          "憋便：可以自己控制什麼時候排便"
+        ],
+        "memo": "環繞肛門的開關，前面連到會陰體"
+      }
+    ],
+    "landmarks": [
+      {
+        "name": "股骨小轉子",
+        "where": "大腿骨上端內後方的小突起",
+        "blocks": [
+          {
+            "icon": "⬇️",
+            "dir": "從腰椎和骨盆裡面往下拉，跨過髖關節前方",
+            "act": "把大腿往上抬（屈髖）",
+            "m": [
+              "腰大肌",
+              "髂肌"
+            ],
+            "note": "合稱髂腰肌"
+          }
+        ],
+        "answers": [
+          "腰大肌",
+          "髂肌"
+        ]
+      },
+      {
+        "name": "肩胛骨內側緣",
+        "where": "肩胛骨靠近脊椎的那條邊",
+        "blocks": [
+          {
+            "icon": "⬅️",
+            "dir": "從脊椎往後拉",
+            "act": "把肩胛骨夾向脊椎（後縮）",
+            "m": [
+              "大、小菱形肌"
+            ]
+          },
+          {
+            "icon": "➡️",
+            "dir": "從肋骨往前拉",
+            "act": "把肩胛骨往前推（前伸）",
+            "m": [
+              "前鋸肌"
+            ]
+          },
+          {
+            "icon": "⬆️",
+            "dir": "從頸椎連到肩胛骨上部",
+            "act": "把肩胛骨往上提",
+            "m": [
+              "提肩胛肌"
+            ]
+          }
+        ],
+        "answers": [
+          "大、小菱形肌",
+          "前鋸肌",
+          "提肩胛肌"
+        ],
+        "tip": "菱形肌和前鋸肌一前一後，是一對拮抗肌"
+      },
+      {
+        "name": "腹壁正中線（白線）",
+        "where": "肚臍上下的正中線",
+        "blocks": [
+          {
+            "icon": "➡️",
+            "dir": "側腹的肌肉往前延伸，在中線會合",
+            "act": "把肚子往內壓、轉身、側彎",
+            "m": [
+              "腹外斜肌",
+              "腹內斜肌",
+              "腹橫肌"
+            ],
+            "note": "由淺到深：外斜、內斜、腹橫"
+          },
+          {
+            "icon": "⬆️",
+            "dir": "從恥骨往上拉到白線下段",
+            "act": "繃緊白線",
+            "m": [
+              "錐狀肌"
+            ]
+          }
+        ],
+        "answers": [
+          "腹外斜肌",
+          "腹內斜肌",
+          "腹橫肌",
+          "錐狀肌"
+        ]
+      },
+      {
+        "name": "上方幾節的棘突",
+        "where": "背部正中線摸到的一顆顆脊椎突起",
+        "blocks": [
+          {
+            "icon": "↗️",
+            "dir": "從下面的橫突斜斜往上拉到棘突",
+            "act": "穩住脊椎、幫忙後仰和轉身",
+            "m": [
+              "半棘肌",
+              "多裂肌",
+              "迴旋肌"
+            ],
+            "note": "同屬橫突棘肌群"
+          }
+        ],
+        "answers": [
+          "半棘肌",
+          "多裂肌",
+          "迴旋肌"
+        ],
+        "ask": "本遊戲介紹的橫突棘肌群成員中，哪些連到上方的棘突？（請全部選出來）"
+      },
+      {
+        "name": "中心腱",
+        "where": "橫膈正中央的腱膜，不連骨頭",
+        "blocks": [
+          {
+            "icon": "⬇️",
+            "dir": "四周的肌纖維往中間收，整片往下拉平",
+            "act": "讓胸腔上下變長（吸氣）",
+            "m": [
+              "橫膈"
+            ]
+          }
+        ],
+        "answers": [
+          "橫膈"
+        ],
+        "tip": "止點不在骨頭上"
+      },
+      {
+        "name": "相鄰兩根肋骨之間",
+        "where": "肋骨與肋骨之間的縫隙",
+        "blocks": [
+          {
+            "icon": "⬆️",
+            "dir": "外層：纖維往前下",
+            "act": "把肋骨往上提（吸氣）",
+            "m": [
+              "外肋間肌"
+            ]
+          },
+          {
+            "icon": "⬇️",
+            "dir": "內層：纖維往後下",
+            "act": "把肋骨往下拉（用力呼氣）",
+            "m": [
+              "內肋間肌"
+            ]
+          },
+          {
+            "icon": "⬇️",
+            "dir": "最內層：纖維方向和內肋間肌相同",
+            "act": "協助用力呼氣",
+            "m": [
+              "最內肋間肌"
+            ]
+          }
+        ],
+        "answers": [
+          "外肋間肌",
+          "內肋間肌",
+          "最內肋間肌"
+        ],
+        "ask": "本遊戲介紹了哪些肋間肌？（請全部選出來）"
+      },
+      {
+        "name": "會陰體",
+        "where": "肛門和生殖器之間的纖維核心",
+        "blocks": [
+          {
+            "icon": "⏺️",
+            "dir": "從骨盆壁往中間連到會陰體",
+            "act": "像吊床一樣支撐骨盆內臟",
+            "m": [
+              "提肛肌"
+            ]
+          },
+          {
+            "icon": "⏺️",
+            "dir": "從會陰體往前延伸",
+            "act": "男性協助擠出尿道殘尿；女性協助縮小陰道口",
+            "m": [
+              "球海綿體肌"
+            ]
+          },
+          {
+            "icon": "↔️",
+            "dir": "從兩側的坐骨橫著拉到中間",
+            "act": "固定會陰體",
+            "m": [
+              "會陰淺橫肌",
+              "會陰深橫肌"
+            ]
+          },
+          {
+            "icon": "⭕",
+            "dir": "從後方環繞肛門，連到會陰體",
+            "act": "關緊肛門（憋便）",
+            "m": [
+              "肛門外括約肌"
+            ]
+          }
+        ],
+        "answers": [
+          "提肛肌",
+          "球海綿體肌",
+          "會陰淺橫肌",
+          "會陰深橫肌",
+          "肛門外括約肌"
+        ],
+        "ask": "本遊戲哪些肌肉與會陰體相連？（請全部選出來）"
+      }
+    ]
+  },
+  "shoulder": {
+    "name": "肩與上臂",
+    "desc": "旋轉袖、三角肌、上臂前後群，加上胸背部會動肩膀的肌肉，共 14 條",
+    "items": [
+      {
+        "name": "三角肌",
+        "values": [
+          "鎖骨外 1/3、肩峰、肩胛棘",
+          "肱骨三角肌粗隆",
+          "肩部",
+          "腋神經",
+          "把手臂往側邊舉成稻草人、舉手打招呼（外展）"
+        ],
+        "memo": "起點剛好是斜方肌的止點：斜方肌放手，三角肌接手"
+      },
+      {
+        "name": "大圓肌",
+        "values": [
+          "肩胛骨下角",
+          "肱骨結節間溝內唇",
+          "肩部",
+          "下肩胛下神經",
+          "把手繞到背後摸腰（伸展＋內收＋內旋）"
+        ],
+        "memo": "闊背肌的小跟班；「大的不進袖子」"
+      },
+      {
+        "name": "棘上肌",
+        "values": [
+          "肩胛骨棘上窩",
+          "肱骨大結節上部",
+          "旋轉袖",
+          "肩胛上神經",
+          "手臂從垂在身側開始往側邊抬，負責最前面的 15 度（外展起始）"
+        ],
+        "memo": "肩胛棘「上」面的窩；大結節由上到下「上、下、小」"
+      },
+      {
+        "name": "棘下肌",
+        "values": [
+          "肩胛骨棘下窩",
+          "肱骨大結節中部",
+          "旋轉袖",
+          "肩胛上神經",
+          "手肘夾在腰側，把前臂往外打開，像打桌球反手拍（外旋）"
+        ],
+        "memo": "肩胛棘「下」面的窩；大結節「上、下、小」的中間"
+      },
+      {
+        "name": "小圓肌",
+        "values": [
+          "肩胛骨外側緣",
+          "肱骨大結節下部",
+          "旋轉袖",
+          "腋神經",
+          "手肘夾在腰側，把前臂往外打開，像打桌球反手拍（外旋）"
+        ],
+        "memo": "小的跟著三角跑：我和三角肌都是腋神經"
+      },
+      {
+        "name": "肩胛下肌",
+        "values": [
+          "肩胛下窩（肩胛骨貼著肋骨的前表面）",
+          "肱骨小結節",
+          "旋轉袖",
+          "上、下肩胛下神經",
+          "手肘夾在腰側，把前臂往內收到肚子前面，像摸自己的肚子（內旋）"
+        ],
+        "memo": "旋轉袖裡唯一去小結節的獨行俠"
+      },
+      {
+        "name": "肱二頭肌",
+        "values": [
+          "兩個頭：盂上結節（長頭）與喙突（短頭）",
+          "橈骨粗隆",
+          "上臂前群",
+          "肌皮神經",
+          "端起杯子時把手肘彎起來（屈肘），同時把手掌翻成朝上接東西（旋後）"
+        ],
+        "memo": "最強的旋後肌；長頭在盂「上」結節，和三頭肌的盂「下」結節成對"
+      },
+      {
+        "name": "肱肌",
+        "values": [
+          "肱骨前面的下半段",
+          "尺骨粗隆",
+          "上臂前群",
+          "肌皮神經（另有一小部分由橈神經支配）",
+          "提起重物時把手肘彎起來，不管手掌朝上或朝下都在出力（屈肘主力）"
+        ],
+        "memo": "躲在二頭肌底下；肱肌止「尺」骨、二頭肌止「橈」骨"
+      },
+      {
+        "name": "喙肱肌",
+        "values": [
+          "肩胛骨喙突",
+          "肱骨中段內側",
+          "上臂前群",
+          "肌皮神經",
+          "把手臂往前、往內抬，像把手橫放到胸前（肩屈曲＋內收）"
+        ],
+        "memo": "從「喙」突到「肱」骨，名字就是答案"
+      },
+      {
+        "name": "肱三頭肌",
+        "values": [
+          "三個頭：盂下結節（長頭）與肱骨後面（外側頭、內側頭）",
+          "尺骨鷹嘴（手肘尖）",
+          "上臂後群",
+          "橈神經",
+          "伏地挺身撐起來、把手肘打直（伸肘）"
+        ],
+        "memo": "三個頭全都止在手肘尖的鷹嘴"
+      },
+      {
+        "name": "斜方肌",
+        "values": [
+          "枕骨上項線、頸椎與胸椎棘突",
+          "鎖骨外 1/3、肩峰、肩胛棘",
+          "背部淺層",
+          "副神經（XI）",
+          "聳肩說「我不知道」；抬頭挺胸，把兩側肩胛骨往中間夾"
+        ],
+        "memo": "背上少數由腦神經支配的肌肉；止點交棒給三角肌"
+      },
+      {
+        "name": "闊背肌",
+        "values": [
+          "下胸椎與腰椎棘突、胸腰筋膜、髂嵴",
+          "肱骨結節間溝",
+          "背部淺層",
+          "胸背神經",
+          "拉單槓、游泳划水，把手臂往下往後拉（伸展＋內收＋內旋）"
+        ],
+        "memo": "大圓肌是我的小跟班；神經是胸背神經，不是肩胛背神經"
+      },
+      {
+        "name": "胸大肌",
+        "values": [
+          "鎖骨內半、胸骨、肋軟骨",
+          "肱骨大結節嵴",
+          "胸部",
+          "內側與外側胸神經",
+          "給人一個大擁抱，把手臂往前、往內抱（屈曲＋內收＋內旋）"
+        ],
+        "memo": "和闊背肌一樣能內收、內旋；胸大肌可幫忙把手臂往前抱，闊背肌則往後拉。"
+      },
+      {
+        "name": "胸小肌",
+        "values": [
+          "第 3～5 肋骨",
+          "肩胛骨喙突",
+          "胸部",
+          "內側胸神經",
+          "把肩膀往前下方拉，像縮肩駝背（肩胛骨下拉、前伸）"
+        ],
+        "memo": "從肋骨拉到喙突；喙突上掛著我、喙肱肌和二頭肌短頭"
+      }
+    ],
+    "theme": [
+      "#3a86ff",
+      "#2ec4b6"
+    ],
+    "landmarks": [
+      {
+        "name": "肱骨大結節",
+        "where": "肱骨頭外側的大突起，在肩膀最外側",
+        "blocks": [
+          {
+            "icon": "⬆️",
+            "dir": "從肩胛骨上方拉",
+            "act": "把手臂往側邊抬（外展的前 15 度）",
+            "m": [
+              "棘上肌"
+            ]
+          },
+          {
+            "icon": "↪️",
+            "dir": "從肩胛骨後方拉",
+            "act": "把手臂往外轉（外旋）",
+            "m": [
+              "棘下肌",
+              "小圓肌"
+            ]
+          }
+        ],
+        "answers": [
+          "棘上肌",
+          "棘下肌",
+          "小圓肌"
+        ],
+        "tip": "由上到下「上、下、小」；肩胛下肌不在這裡（考過）"
+      },
+      {
+        "name": "肱骨小結節",
+        "where": "肱骨頭前方的小突起",
+        "blocks": [
+          {
+            "icon": "↩️",
+            "dir": "從肩胛骨前面繞過來拉",
+            "act": "把手臂往內轉（內旋）",
+            "m": [
+              "肩胛下肌"
+            ]
+          }
+        ],
+        "answers": [
+          "肩胛下肌"
+        ],
+        "tip": "旋轉袖裡唯一去小結節的（考過）"
+      },
+      {
+        "name": "肱骨結節間溝周圍",
+        "where": "大、小結節之間的溝",
+        "blocks": [
+          {
+            "icon": "↩️",
+            "dir": "從背後拉過來",
+            "act": "手臂往下往後收、往內轉（伸展＋內收＋內旋）",
+            "m": [
+              "闊背肌",
+              "大圓肌"
+            ]
+          },
+          {
+            "icon": "↩️",
+            "dir": "從胸前拉過來",
+            "act": "手臂往前抱、往內轉（屈曲＋內收＋內旋）",
+            "m": [
+              "胸大肌"
+            ]
+          }
+        ],
+        "answers": [
+          "闊背肌",
+          "大圓肌",
+          "胸大肌"
+        ]
+      },
+      {
+        "name": "肩胛骨喙突",
+        "where": "鎖骨外側下方、往前突出的小鉤子",
+        "blocks": [
+          {
+            "icon": "⬇️",
+            "dir": "從喙突連到上臂",
+            "act": "把上臂往前抬、往內收",
+            "m": [
+              "喙肱肌"
+            ]
+          },
+          {
+            "icon": "⬇️",
+            "dir": "肱二頭肌短頭從喙突往下，跨過手肘",
+            "act": "彎手肘",
+            "m": [
+              "肱二頭肌"
+            ],
+            "note": "從喙突出發的是短頭"
+          },
+          {
+            "icon": "⬆️",
+            "dir": "從肋骨連到喙突",
+            "act": "把肩胛骨往前下方帶",
+            "m": [
+              "胸小肌"
+            ]
+          }
+        ],
+        "answers": [
+          "喙肱肌",
+          "肱二頭肌",
+          "胸小肌"
+        ]
+      },
+      {
+        "name": "盂上結節與盂下結節",
+        "where": "肩關節盂的正上方與正下方",
+        "blocks": [
+          {
+            "icon": "⬇️",
+            "dir": "從關節盂上方出發，走在手臂前面",
+            "act": "彎手肘（屈肘）",
+            "m": [
+              "肱二頭肌"
+            ],
+            "note": "長頭"
+          },
+          {
+            "icon": "⬇️",
+            "dir": "從關節盂下方出發，走在手臂後面",
+            "act": "打直手肘（伸肘）",
+            "m": [
+              "肱三頭肌"
+            ],
+            "note": "長頭"
+          }
+        ],
+        "answers": [
+          "肱二頭肌",
+          "肱三頭肌"
+        ],
+        "tip": "兩條都跨過肩和肘兩個關節，上下成對"
+      },
+      {
+        "name": "尺骨鷹嘴（手肘尖）",
+        "where": "手肘彎起來時最尖的那塊骨頭",
+        "blocks": [
+          {
+            "icon": "⬆️",
+            "dir": "從手肘後方往上拉",
+            "act": "打直手肘（伸肘）",
+            "m": [
+              "肱三頭肌",
+              "肘肌"
+            ]
+          }
+        ],
+        "answers": [
+          "肱三頭肌",
+          "肘肌"
+        ],
+        "ask": "哪些肌肉止在尺骨鷹嘴？（請全部選出來）"
+      },
+      {
+        "name": "鎖骨外 1/3、肩峰、肩胛棘",
+        "where": "肩膀頂端那一圈骨頭",
+        "blocks": [
+          {
+            "icon": "⬆️",
+            "dir": "背上的肌肉從上方拉住它",
+            "act": "聳肩（上提肩胛）",
+            "m": [
+              "斜方肌"
+            ]
+          },
+          {
+            "icon": "⬇️",
+            "dir": "肩膀的肌肉從這裡出發往下拉",
+            "act": "把手臂往側邊舉（外展）",
+            "m": [
+              "三角肌"
+            ]
+          }
+        ],
+        "answers": [
+          "斜方肌",
+          "三角肌"
+        ],
+        "tip": "斜方肌放手，三角肌接手"
+      },
+      {
+        "name": "橈骨粗隆與尺骨粗隆",
+        "where": "前臂兩根骨頭靠近手肘的前方",
+        "blocks": [
+          {
+            "icon": "⬆️",
+            "dir": "從上臂前面拉到橈骨",
+            "act": "彎手肘＋把手掌翻朝上（屈肘＋旋後）",
+            "m": [
+              "肱二頭肌"
+            ]
+          },
+          {
+            "icon": "⬆️",
+            "dir": "從上臂前面拉到尺骨",
+            "act": "只負責彎手肘（屈肘）",
+            "m": [
+              "肱肌"
+            ]
+          }
+        ],
+        "answers": [
+          "肱二頭肌",
+          "肱肌"
+        ]
+      }
+    ]
+  },
+  "forearm": {
+    "name": "前臂與手",
+    "desc": "前臂前群、後群（分淺深層）與手部肌（魚際、小魚際、手掌深部），共 30 條",
+    "theme": [
+      "#06a77d",
+      "#2ec4b6"
+    ],
+    "items": [
+      {
+        "name": "旋前圓肌",
+        "values": [
+          "肱骨內上髁、尺骨冠狀突",
+          "橈骨外側面中段",
+          "前臂前群淺層",
+          "正中神經",
+          "打鍵盤時把手背翻朝上（旋前），也幫忙彎手肘"
+        ],
+        "memo": "名字就是動作：負責「旋前」的「圓」肌；受正中神經支配（考過）"
+      },
+      {
+        "name": "橈側屈腕肌",
+        "values": [
+          "肱骨內上髁",
+          "第 2、3 掌骨底",
+          "前臂前群淺層",
+          "正中神經",
+          "手腕往掌心彎，同時偏向拇指側（屈腕＋橈側偏）"
+        ],
+        "memo": "「橈側」就是拇指那一側"
+      },
+      {
+        "name": "掌長肌",
+        "values": [
+          "肱骨內上髁",
+          "屈肌支持帶與掌腱膜",
+          "前臂前群淺層",
+          "正中神經",
+          "握拳屈腕時，手腕正中央浮出一條細細的肌腱（屈腕、繃緊掌腱膜）"
+        ],
+        "memo": "約一成多的人沒有我；走在腕隧道外面，皮下摸得到（考過）"
+      },
+      {
+        "name": "尺側屈腕肌",
+        "values": [
+          "肱骨內上髁、鷹嘴與尺骨後緣",
+          "豆狀骨、鉤骨鉤、第 5 掌骨底",
+          "前臂前群淺層",
+          "尺神經",
+          "手腕往掌心彎，同時偏向小指側（屈腕＋尺側偏）"
+        ],
+        "memo": "前群淺層裡唯一由尺神經支配的例外（考過）"
+      },
+      {
+        "name": "屈指淺肌",
+        "values": [
+          "肱骨內上髁、尺骨冠狀突、橈骨前面",
+          "第 2～5 指的中節指骨",
+          "前臂前群中深層",
+          "正中神經",
+          "彎曲手指中間那一節，像用手指勾住購物袋（屈近端指間關節）"
+        ],
+        "memo": "「淺」的止在中節，「深」的止在遠節"
+      },
+      {
+        "name": "屈指深肌",
+        "values": [
+          "尺骨前內側面、骨間膜",
+          "第 2～5 指的遠節指骨",
+          "前臂前群中深層",
+          "兩條：外側半（第 2、3 指）是正中神經，內側半（第 4、5 指）是尺神經",
+          "彎曲指尖那一節，像用指尖扣住東西（屈遠端指間關節）"
+        ],
+        "memo": "不附著內上髁（考過）；一塊肌肉兩條神經",
+        "mixedKey": true
+      },
+      {
+        "name": "屈拇長肌",
+        "values": [
+          "橈骨前面、骨間膜",
+          "拇指的遠節指骨",
+          "前臂前群中深層",
+          "正中神經（骨間前神經分支）",
+          "彎曲拇指尖，像按原子筆（屈拇指）"
+        ],
+        "memo": "前臂前群深層肌之一，負責彎曲拇指尖。"
+      },
+      {
+        "name": "旋前方肌",
+        "values": [
+          "尺骨遠端前面",
+          "橈骨遠端前面",
+          "前臂前群中深層",
+          "正中神經（骨間前神經分支）",
+          "翻手背朝上的主力（旋前）"
+        ],
+        "memo": "方形，起止點都在前臂骨上，不附著肱骨（考過兩次）"
+      },
+      {
+        "name": "肱橈肌",
+        "values": [
+          "肱骨外上髁上嵴",
+          "橈骨莖突",
+          "前臂後群淺層",
+          "橈神經",
+          "拳頭直立、像舉啤酒杯一樣彎手肘（屈肘）"
+        ],
+        "memo": "住在伸肌群、由橈神經支配（考過），功能卻是屈肘的例外"
+      },
+      {
+        "name": "橈側伸腕長肌",
+        "values": [
+          "肱骨外上髁上嵴",
+          "第 2 掌骨底",
+          "前臂後群淺層",
+          "橈神經",
+          "手腕往手背翹，同時偏向拇指側（伸腕＋橈側偏）"
+        ],
+        "memo": "「長」的止在第 2 掌骨（考過）、「短」的止在第 3 掌骨"
+      },
+      {
+        "name": "橈側伸腕短肌",
+        "values": [
+          "肱骨外上髁",
+          "第 3 掌骨底",
+          "前臂後群淺層",
+          "橈神經",
+          "打網球反手拍時把手腕翹起來（伸腕＋橈側偏）"
+        ],
+        "memo": "從外上髁出發（考過）；網球肘最常受傷的就是我"
+      },
+      {
+        "name": "伸指肌",
+        "values": [
+          "肱骨外上髁",
+          "第 2～5 指的指背腱膜",
+          "前臂後群淺層",
+          "橈神經",
+          "張開手掌、把四根手指伸直（伸指）"
+        ],
+        "memo": "一條肌肉分成四條肌腱，分到四根手指"
+      },
+      {
+        "name": "伸小指肌",
+        "values": [
+          "肱骨外上髁",
+          "小指的指背腱膜",
+          "前臂後群淺層",
+          "橈神經",
+          "單獨把小指翹起來（伸小指）"
+        ],
+        "memo": "起於外上髁，不附著骨間膜（考過）"
+      },
+      {
+        "name": "尺側伸腕肌",
+        "values": [
+          "肱骨外上髁、尺骨後緣",
+          "第 5 掌骨底",
+          "前臂後群淺層",
+          "橈神經",
+          "手腕往手背翹，同時偏向小指側（伸腕＋尺側偏）"
+        ],
+        "memo": "伸腕加「內收」，不是外展"
+      },
+      {
+        "name": "肘肌",
+        "values": [
+          "肱骨外上髁",
+          "尺骨鷹嘴外側面",
+          "前臂後群淺層",
+          "橈神經",
+          "幫肱三頭肌把手肘打直（伸肘）"
+        ],
+        "memo": "小小一塊三角形，起點在外上髁（考過）"
+      },
+      {
+        "name": "旋後肌",
+        "values": [
+          "肱骨外上髁、尺骨旋後肌嵴",
+          "橈骨近端外側",
+          "前臂後群深層",
+          "橈神經（深支）",
+          "伸手接東西時把掌心翻朝上（旋後）"
+        ],
+        "memo": "名字就是動作；橈神經深支從我中間穿過"
+      },
+      {
+        "name": "外展拇長肌",
+        "values": [
+          "尺骨與橈骨後面、骨間膜",
+          "第 1 掌骨底",
+          "前臂後群深層",
+          "橈神經（骨間後神經）",
+          "比「讚」之前，把拇指往外打開（外展拇指）"
+        ],
+        "memo": "和伸拇短肌一起構成解剖鼻煙盒的外側（前）界"
+      },
+      {
+        "name": "伸拇短肌",
+        "values": [
+          "橈骨後面、骨間膜",
+          "拇指的近節指骨",
+          "前臂後群深層",
+          "橈神經（骨間後神經）",
+          "伸直拇指根部那一節（伸拇指近節）"
+        ],
+        "memo": "鼻煙盒外側（前）界的另一條"
+      },
+      {
+        "name": "伸拇長肌",
+        "values": [
+          "尺骨後面、骨間膜",
+          "拇指的遠節指骨",
+          "前臂後群深層",
+          "橈神經（骨間後神經）",
+          "搭便車時把拇指整根翹起來（伸拇指）"
+        ],
+        "memo": "鼻煙盒的內側（後）界；位於前臂後群深層。"
+      },
+      {
+        "name": "伸食指肌",
+        "values": [
+          "尺骨後面、骨間膜",
+          "食指的指背腱膜",
+          "前臂後群深層",
+          "橈神經（骨間後神經）",
+          "用食指指方向時，單獨把食指伸直（伸食指）"
+        ],
+        "memo": "不是解剖鼻煙盒的界線（考過）"
+      },
+      {
+        "name": "外展拇短肌",
+        "values": [
+          "屈肌支持帶、舟狀骨、大多角骨",
+          "拇指的近節指骨",
+          "魚際肌群",
+          "正中神經（返支）",
+          "把拇指往掌心前方抬起，離開手掌平面（外展拇指）。"
+        ],
+        "memo": "魚際肌主要由正中神經支配。"
+      },
+      {
+        "name": "屈拇短肌",
+        "values": [
+          "屈肌支持帶、大多角骨",
+          "拇指的近節指骨",
+          "魚際肌群",
+          "正中神經（深頭另有尺神經）",
+          "彎曲拇指根部（屈拇指掌指關節）"
+        ],
+        "memo": "淺頭正中神經、深頭尺神經"
+      },
+      {
+        "name": "對掌拇肌",
+        "values": [
+          "屈肌支持帶、大多角骨",
+          "第 1 掌骨外側緣",
+          "魚際肌群",
+          "正中神經（返支）",
+          "拇指去碰小指指尖（對掌）"
+        ],
+        "memo": "正中神經受損時就沒辦法對掌"
+      },
+      {
+        "name": "外展小指肌",
+        "values": [
+          "豆狀骨",
+          "小指的近節指骨",
+          "小魚際肌群",
+          "尺神經（深支）",
+          "把小指往外張開（外展小指）"
+        ],
+        "memo": "小魚際三兄弟和魚際三兄弟對稱：外展、屈、對掌；神經換成尺神經"
+      },
+      {
+        "name": "屈小指短肌",
+        "values": [
+          "鉤骨鉤與屈肌支持帶",
+          "小指的近節指骨",
+          "小魚際肌群",
+          "尺神經（深支）",
+          "彎曲小指根部（屈小指）"
+        ],
+        "memo": "和魚際的屈拇短肌對稱"
+      },
+      {
+        "name": "對掌小指肌",
+        "values": [
+          "鉤骨鉤與屈肌支持帶",
+          "第 5 掌骨內側緣",
+          "小魚際肌群",
+          "尺神經（深支）",
+          "把小指往掌心、往拇指方向帶，和拇指捏在一起（對掌）"
+        ],
+        "memo": "和對掌拇肌一樣，止在掌骨而不是指骨"
+      },
+      {
+        "name": "拇收肌",
+        "values": [
+          "頭狀骨、第 2～3 掌骨（斜頭）與第 3 掌骨（橫頭）",
+          "拇指的近節指骨",
+          "手掌深部",
+          "尺神經（深支）",
+          "用拇指和食指側邊夾住鑰匙（內收拇指）"
+        ],
+        "memo": "在拇指區，卻是尺神經支配的例外（考過）"
+      },
+      {
+        "name": "蚓狀肌",
+        "values": [
+          "屈指深肌的肌腱",
+          "第 2～5 指的指背腱膜",
+          "手掌深部",
+          "兩條：外側兩條是正中神經，內側兩條是尺神經",
+          "手掌彎成「桌面」：掌指關節彎、手指打直（屈掌指＋伸指間）"
+        ],
+        "memo": "起點不在骨頭上，而在屈指深肌的肌腱上（考過）",
+        "mixedKey": true
+      },
+      {
+        "name": "掌側骨間肌",
+        "values": [
+          "第 2、4、5 掌骨",
+          "同一根手指的近節指骨與指背腱膜",
+          "手掌深部",
+          "尺神經（深支）",
+          "把張開的手指併攏（內收手指）"
+        ],
+        "memo": "PAD：掌側（Palmar）內收（ADduct）；中指是軸心，所以不起於第 3 掌骨（考過）"
+      },
+      {
+        "name": "背側骨間肌",
+        "values": [
+          "相鄰兩根掌骨的側面",
+          "近節指骨與指背腱膜",
+          "手掌深部",
+          "尺神經（深支）",
+          "把手指張開（外展手指）"
+        ],
+        "memo": "DAB：背側（Dorsal）外展（ABduct），共四條"
+      }
+    ],
+    "landmarks": [
+      {
+        "name": "肱骨內上髁",
+        "where": "手肘內側摸得到的骨頭尖",
+        "blocks": [
+          {
+            "icon": "⬇️",
+            "dir": "從手肘內前方往下走到手掌面",
+            "act": "彎手腕、彎手指、翻手背朝上",
+            "m": [
+              "旋前圓肌",
+              "橈側屈腕肌",
+              "掌長肌",
+              "尺側屈腕肌",
+              "屈指淺肌"
+            ],
+            "note": "屈肌總腱"
+          }
+        ],
+        "answers": [
+          "旋前圓肌",
+          "橈側屈腕肌",
+          "掌長肌",
+          "尺側屈腕肌",
+          "屈指淺肌"
+        ],
+        "tip": "屈指深肌不在這裡（考過）"
+      },
+      {
+        "name": "肱骨外上髁",
+        "where": "手肘外側摸得到的骨頭尖",
+        "blocks": [
+          {
+            "icon": "⬇️",
+            "dir": "從手肘外後方往下走到手背面",
+            "act": "翹手腕、伸直手指",
+            "m": [
+              "橈側伸腕短肌",
+              "伸指肌",
+              "伸小指肌",
+              "尺側伸腕肌"
+            ],
+            "note": "伸肌總腱"
+          },
+          {
+            "icon": "↪️",
+            "dir": "往前繞過橈骨",
+            "act": "把手掌翻朝上（旋後）",
+            "m": [
+              "旋後肌"
+            ]
+          },
+          {
+            "icon": "⬇️",
+            "dir": "往下拉到鷹嘴",
+            "act": "幫忙打直手肘（伸肘）",
+            "m": [
+              "肘肌"
+            ]
+          }
+        ],
+        "answers": [
+          "橈側伸腕短肌",
+          "伸指肌",
+          "伸小指肌",
+          "尺側伸腕肌",
+          "旋後肌",
+          "肘肌"
+        ]
+      },
+      {
+        "name": "前臂骨間膜（後面）",
+        "where": "尺骨和橈骨之間那片膜的手背側",
+        "blocks": [
+          {
+            "icon": "➡️",
+            "dir": "從前臂後面深層往拇指和食指走",
+            "act": "打開、伸直拇指，單獨伸直食指",
+            "m": [
+              "外展拇長肌",
+              "伸拇短肌",
+              "伸拇長肌",
+              "伸食指肌"
+            ]
+          }
+        ],
+        "answers": [
+          "外展拇長肌",
+          "伸拇短肌",
+          "伸拇長肌",
+          "伸食指肌"
+        ],
+        "tip": "伸小指肌不在這裡（考過）"
+      },
+      {
+        "name": "第 2、3 掌骨底（手背面）",
+        "where": "手背上食指、中指根部後方",
+        "blocks": [
+          {
+            "icon": "⬆️",
+            "dir": "從手肘外側拉到手背拇指側",
+            "act": "翹手腕＋往拇指側偏",
+            "m": [
+              "橈側伸腕長肌",
+              "橈側伸腕短肌"
+            ]
+          }
+        ],
+        "answers": [
+          "橈側伸腕長肌",
+          "橈側伸腕短肌"
+        ],
+        "tip": "長的到第 2 掌骨、短的到第 3 掌骨（考過）"
+      },
+      {
+        "name": "第 5 掌骨底與豆狀骨（小指側）",
+        "where": "手腕小指側那顆骨頭附近",
+        "blocks": [
+          {
+            "icon": "⬇️",
+            "dir": "掌面那條",
+            "act": "彎手腕＋往小指側偏",
+            "m": [
+              "尺側屈腕肌"
+            ]
+          },
+          {
+            "icon": "⬆️",
+            "dir": "手背那條",
+            "act": "翹手腕＋往小指側偏",
+            "m": [
+              "尺側伸腕肌"
+            ]
+          }
+        ],
+        "answers": [
+          "尺側屈腕肌",
+          "尺側伸腕肌"
+        ],
+        "tip": "兩條一起收縮，手腕就往小指側偏",
+        "ask": "哪些前臂肌肉止在這一帶？（請全部選出來）"
+      },
+      {
+        "name": "屈肌支持帶與大多角骨",
+        "where": "手掌拇指根部那塊肉的深處",
+        "blocks": [
+          {
+            "icon": "➡️",
+            "dir": "從腕骨前面拉向拇指",
+            "act": "張開、彎曲拇指，去碰小指（對掌）",
+            "m": [
+              "外展拇短肌",
+              "屈拇短肌",
+              "對掌拇肌"
+            ],
+            "note": "合稱魚際肌群"
+          }
+        ],
+        "answers": [
+          "外展拇短肌",
+          "屈拇短肌",
+          "對掌拇肌"
+        ],
+        "ask": "哪些魚際肌從這一帶出發、走向拇指？（請全部選出來）"
+      },
+      {
+        "name": "屈指深肌的肌腱",
+        "where": "手掌裡往四根手指走的深層肌腱",
+        "blocks": [
+          {
+            "icon": "➡️",
+            "dir": "起點掛在屈指深肌的肌腱上",
+            "act": "彎掌指關節、伸直指間關節（桌面手勢）",
+            "m": [
+              "蚓狀肌"
+            ]
+          }
+        ],
+        "answers": [
+          "蚓狀肌"
+        ],
+        "tip": "考過"
+      }
+    ]
+  },
+  "thigh": {
+    "name": "臀部與大腿",
+    "desc": "臀部淺層與深層、大腿前群、內側群、後群，共 24 條",
+    "theme": [
+      "#f3722c",
+      "#f94144"
+    ],
+    "items": [
+      {
+        "name": "臀大肌",
+        "values": [
+          "髂骨後面、薦骨與尾骨背面、薦結節韌帶",
+          "臀肌粗隆、髂脛束",
+          "臀部淺層",
+          "臀下神經",
+          "爬樓梯、從椅子上站起來時把大腿往後推（伸髖），也幫忙外旋"
+        ],
+        "memo": "臀「大」配臀「下」神經（考過）；深面有坐骨神經，不是首選注射部位"
+      },
+      {
+        "name": "臀中肌",
+        "values": [
+          "髂骨外面（臀前線與臀後線之間）",
+          "股骨大轉子",
+          "臀部淺層",
+          "臀上神經",
+          "單腳站立時穩住骨盆、不讓它往對側掉（外展髖），也幫忙內旋"
+        ],
+        "memo": "肌肉注射最被建議的部位（考過）；我沒力時，走路骨盆會往對側掉"
+      },
+      {
+        "name": "臀小肌",
+        "values": [
+          "髂骨外面（臀前線與臀下線之間）",
+          "股骨大轉子前面",
+          "臀部淺層",
+          "臀上神經",
+          "和臀中肌一起把大腿往側邊抬（外展＋內旋髖）"
+        ],
+        "memo": "最深的臀肌；不穿過坐骨大孔（考過的陷阱選項）"
+      },
+      {
+        "name": "闊筋膜張肌",
+        "values": [
+          "髂前上棘",
+          "髂脛束",
+          "臀部淺層",
+          "臀上神經",
+          "走路時把大腿往前、往外帶，同時繃緊大腿外側（屈曲＋外展髖）"
+        ],
+        "memo": "名字就是動作：「張」緊「闊筋膜」；不是股三角的界線（考過）"
+      },
+      {
+        "name": "梨狀肌",
+        "values": [
+          "薦骨前面",
+          "股骨大轉子上緣",
+          "臀部深層",
+          "薦神經叢分支（S1～S2）",
+          "盤腿坐時把大腿往外轉（外旋髖）"
+        ],
+        "memo": "穿過坐骨大孔（考過）；坐骨神經多半從我的下緣穿出"
+      },
+      {
+        "name": "上孖肌",
+        "values": [
+          "坐骨棘",
+          "隨閉孔內肌腱止於大轉子內側",
+          "臀部深層",
+          "閉孔內肌神經",
+          "把大腿往外轉（外旋髖）"
+        ],
+        "memo": "坐骨神經從梨狀肌和我之間穿出（考過）"
+      },
+      {
+        "name": "閉孔內肌",
+        "values": [
+          "閉孔膜內面與周圍骨面",
+          "股骨大轉子內側面",
+          "臀部深層",
+          "閉孔內肌神經",
+          "把大腿往外轉（外旋髖）"
+        ],
+        "memo": "從骨盆裡面出發，穿過坐骨「小」孔轉出來（陷阱：不是大孔）"
+      },
+      {
+        "name": "下孖肌",
+        "values": [
+          "坐骨粗隆上部",
+          "隨閉孔內肌腱止於大轉子內側",
+          "臀部深層",
+          "股方肌神經",
+          "把大腿往外轉（外旋髖）"
+        ],
+        "memo": "外旋肌由上到下：「梨、上孖、閉內、下孖、股方」"
+      },
+      {
+        "name": "股方肌",
+        "values": [
+          "坐骨粗隆外側",
+          "股骨轉子間嵴",
+          "臀部深層",
+          "股方肌神經",
+          "把大腿往外轉（外旋髖）"
+        ],
+        "memo": "名字有「股」，但跟伸膝無關，是外旋肌（考過）"
+      },
+      {
+        "name": "縫匠肌",
+        "values": [
+          "髂前上棘",
+          "脛骨內側上端（鵝足）",
+          "大腿前群",
+          "股神經",
+          "翹二郎腿：屈髖、外展、外旋髖，再加上屈膝"
+        ],
+        "memo": "全身最長的肌肉；起點在髂前上棘（考過），跨髖和膝兩個關節，是股三角外界"
+      },
+      {
+        "name": "股直肌",
+        "values": [
+          "髂前下棘",
+          "經髕骨、髕韌帶止於脛骨粗隆",
+          "大腿前群",
+          "股神經",
+          "踢球時把大腿往前抬，再把小腿踢直（屈髖＋伸膝）"
+        ],
+        "memo": "股四頭肌裡唯一跨過髖關節、能屈髖的一條（考過）"
+      },
+      {
+        "name": "股外側肌",
+        "values": [
+          "股骨大轉子、股骨粗線外唇",
+          "經髕骨、髕韌帶止於脛骨粗隆",
+          "大腿前群",
+          "股神經",
+          "從蹲姿站起來時把膝蓋打直（伸膝）"
+        ],
+        "memo": "大腿外側最大塊；常用的肌肉注射部位"
+      },
+      {
+        "name": "股內側肌",
+        "values": [
+          "股骨粗線內唇",
+          "經髕骨、髕韌帶止於脛骨粗隆",
+          "大腿前群",
+          "股神經",
+          "膝蓋最後完全伸直的那一下（伸膝）"
+        ],
+        "memo": "只跨膝關節，不是雙關節肌（考過）"
+      },
+      {
+        "name": "股中間肌",
+        "values": [
+          "股骨幹前面與外側面",
+          "經髕骨、髕韌帶止於脛骨粗隆",
+          "大腿前群",
+          "股神經",
+          "把膝蓋打直（伸膝）"
+        ],
+        "memo": "藏在股直肌底下，「中間」那一塊"
+      },
+      {
+        "name": "恥骨肌",
+        "values": [
+          "恥骨上支（恥骨線）",
+          "股骨恥骨肌線",
+          "大腿內側群",
+          "股神經（有時另有閉孔神經）",
+          "把大腿往前、往內收（屈曲＋內收髖）"
+        ],
+        "memo": "住在內側群，卻主要由股神經支配的例外；股三角的底之一"
+      },
+      {
+        "name": "內收長肌",
+        "values": [
+          "恥骨體",
+          "股骨粗線中段",
+          "大腿內側群",
+          "閉孔神經",
+          "騎馬時夾住馬背（內收髖）"
+        ],
+        "memo": "股三角內界；受閉孔神經，不是股神經（考過）"
+      },
+      {
+        "name": "內收短肌",
+        "values": [
+          "恥骨體與恥骨下支",
+          "股骨粗線上段",
+          "大腿內側群",
+          "閉孔神經",
+          "夾緊雙腿（內收髖）"
+        ],
+        "memo": "藏在內收長肌後面、「短」的那一塊"
+      },
+      {
+        "name": "內收大肌",
+        "values": [
+          "恥骨下支、坐骨支、坐骨粗隆",
+          "股骨粗線與內收肌結節（不附著脛骨）",
+          "大腿內側群",
+          "兩條：內收部是閉孔神經，膕旁肌部是坐骨神經（脛神經部）",
+          "夾緊雙腿（內收髖），後半部還能幫忙伸髖"
+        ],
+        "memo": "一塊肌肉兩條神經；止在股骨，不到脛骨（考過）",
+        "mixedKey": true
+      },
+      {
+        "name": "股薄肌",
+        "values": [
+          "恥骨體與恥骨下支",
+          "脛骨內側上端（鵝足）",
+          "大腿內側群",
+          "閉孔神經",
+          "夾緊雙腿（內收髖），也幫忙屈膝"
+        ],
+        "memo": "內側群唯一跨過膝蓋、附著脛骨的（考過）；不是股三角界線（考過）"
+      },
+      {
+        "name": "閉孔外肌",
+        "values": [
+          "閉孔膜外面與周圍的骨頭",
+          "股骨轉子窩",
+          "大腿內側群",
+          "閉孔神經",
+          "把大腿往外轉（外旋髖）"
+        ],
+        "memo": "名字像閉孔內肌，但我在骨盆外面，由閉孔神經支配"
+      },
+      {
+        "name": "半腱肌",
+        "values": [
+          "坐骨粗隆",
+          "脛骨內側上端（鵝足）",
+          "大腿後群",
+          "脛神經（坐骨神經的脛神經部）",
+          "往後踢腿、彎膝蓋，像踢毽子（伸髖＋屈膝）"
+        ],
+        "memo": "鵝足三兄弟「縫匠、股薄、半腱」，分別來自前、內、後三個腔室"
+      },
+      {
+        "name": "半膜肌",
+        "values": [
+          "坐骨粗隆",
+          "脛骨內髁後面",
+          "大腿後群",
+          "脛神經（坐骨神經的脛神經部）",
+          "往後踢腿、彎膝蓋（伸髖＋屈膝）"
+        ],
+        "memo": "在半腱肌深面，是膕窩的上內界"
+      },
+      {
+        "name": "股二頭肌長頭",
+        "values": [
+          "坐骨粗隆",
+          "腓骨頭",
+          "大腿後群",
+          "脛神經（坐骨神經的脛神經部）",
+          "往後踢腿、彎膝蓋（伸髖＋屈膝）"
+        ],
+        "memo": "兩個頭都止在腓骨頭；長頭跨髖和膝兩個關節"
+      },
+      {
+        "name": "股二頭肌短頭",
+        "values": [
+          "股骨粗線外唇",
+          "腓骨頭",
+          "大腿後群",
+          "腓總神經（坐骨神經的腓總神經部）",
+          "只負責彎膝蓋（屈膝）"
+        ],
+        "memo": "後群唯一由腓總神經支配（考過），也不動髖關節（考過）"
+      }
+    ],
+    "landmarks": [
+      {
+        "name": "髂前上棘",
+        "where": "叉腰時，手指摸到骨盆前面最突出的那一點",
+        "blocks": [
+          {
+            "icon": "↘️",
+            "dir": "往內下斜到膝蓋內側",
+            "act": "翹二郎腿（屈髖＋外旋＋屈膝）",
+            "m": [
+              "縫匠肌"
+            ]
+          },
+          {
+            "icon": "⬇️",
+            "dir": "往下連到大腿外側的髂脛束",
+            "act": "把大腿往前、往外帶（屈髖＋外展）",
+            "m": [
+              "闊筋膜張肌"
+            ]
+          }
+        ],
+        "answers": [
+          "縫匠肌",
+          "闊筋膜張肌"
+        ]
+      },
+      {
+        "name": "髂前下棘",
+        "where": "髂前上棘正下方的小突起",
+        "blocks": [
+          {
+            "icon": "⬇️",
+            "dir": "從骨盆出發，跨過髖和膝",
+            "act": "抬大腿（屈髖）＋踢直小腿（伸膝）",
+            "m": [
+              "股直肌"
+            ]
+          }
+        ],
+        "answers": [
+          "股直肌"
+        ],
+        "tip": "股四頭肌裡唯一跨過髖關節的（考過）"
+      },
+      {
+        "name": "坐骨粗隆（往下跨過膝蓋的）",
+        "where": "坐下時，屁股底下頂到椅子的那塊骨頭",
+        "blocks": [
+          {
+            "icon": "⬇️",
+            "dir": "從髖關節後方往下拉",
+            "act": "把腿往後推（伸髖）",
+            "m": []
+          },
+          {
+            "icon": "⬇️",
+            "dir": "再跨過膝蓋後方",
+            "act": "彎膝蓋（屈膝）",
+            "m": [
+              "半腱肌",
+              "半膜肌",
+              "股二頭肌長頭"
+            ],
+            "note": "合稱膕旁肌"
+          }
+        ],
+        "answers": [
+          "半腱肌",
+          "半膜肌",
+          "股二頭肌長頭"
+        ],
+        "tip": "內收大肌也從這裡出發，但沒有跨過膝蓋",
+        "ask": "請問哪些肌肉從這裡出發、一路跨過膝蓋？（請全部選出來）"
+      },
+      {
+        "name": "股骨大轉子",
+        "where": "大腿外側最上端摸得到的骨頭",
+        "blocks": [
+          {
+            "icon": "⬆️",
+            "dir": "從上方拉",
+            "act": "把腿往側邊抬（外展）",
+            "m": [
+              "臀中肌",
+              "臀小肌"
+            ]
+          },
+          {
+            "icon": "↪️",
+            "dir": "從後方繞過來拉",
+            "act": "把腿往外轉（外旋）",
+            "m": [
+              "梨狀肌",
+              "閉孔內肌",
+              "上孖肌",
+              "下孖肌"
+            ]
+          }
+        ],
+        "answers": [
+          "臀中肌",
+          "臀小肌",
+          "梨狀肌",
+          "閉孔內肌",
+          "上孖肌",
+          "下孖肌"
+        ],
+        "ask": "哪些肌肉止在股骨大轉子？（請全部選出來）"
+      },
+      {
+        "name": "鵝足（脛骨內側上端）",
+        "where": "膝蓋內側下方",
+        "blocks": [
+          {
+            "icon": "↩️",
+            "dir": "從大腿前、內、後三個方向拉到膝蓋內側",
+            "act": "彎膝蓋、穩住膝蓋內側",
+            "m": [
+              "縫匠肌",
+              "股薄肌",
+              "半腱肌"
+            ]
+          }
+        ],
+        "answers": [
+          "縫匠肌",
+          "股薄肌",
+          "半腱肌"
+        ],
+        "tip": "三個腔室各派一條：前群、內側群、後群"
+      },
+      {
+        "name": "脛骨粗隆（經過髕骨）",
+        "where": "膝蓋骨正下方的骨頭突起",
+        "blocks": [
+          {
+            "icon": "⬇️",
+            "dir": "四個頭合成一條肌腱，包住髕骨往下拉",
+            "act": "打直膝蓋（伸膝）",
+            "m": [
+              "股直肌",
+              "股外側肌",
+              "股內側肌",
+              "股中間肌"
+            ],
+            "note": "合稱股四頭肌"
+          }
+        ],
+        "answers": [
+          "股直肌",
+          "股外側肌",
+          "股內側肌",
+          "股中間肌"
+        ]
+      },
+      {
+        "name": "股骨粗線（從恥骨拉過來的）",
+        "where": "大腿骨後面中央的一條骨嵴",
+        "blocks": [
+          {
+            "icon": "⬅️",
+            "dir": "從恥骨往外拉到大腿骨後面",
+            "act": "夾緊雙腿（內收）",
+            "m": [
+              "內收長肌",
+              "內收短肌",
+              "內收大肌"
+            ]
+          }
+        ],
+        "answers": [
+          "內收長肌",
+          "內收短肌",
+          "內收大肌"
+        ],
+        "ask": "請問哪些肌肉從恥骨拉到這裡？（請全部選出來）"
+      },
+      {
+        "name": "腓骨頭（大腿肌肉的止點）",
+        "where": "膝蓋外側下方摸得到的小骨頭",
+        "blocks": [
+          {
+            "icon": "⬆️",
+            "dir": "從膝蓋後外側往上拉",
+            "act": "彎膝蓋（屈膝）",
+            "m": [
+              "股二頭肌長頭",
+              "股二頭肌短頭"
+            ]
+          }
+        ],
+        "answers": [
+          "股二頭肌長頭",
+          "股二頭肌短頭"
+        ],
+        "ask": "哪些大腿肌肉止在腓骨頭？（請全部選出來）"
+      }
+    ]
+  },
+  "leg": {
+    "name": "小腿與足",
+    "desc": "小腿前群、外側群、後群（淺、深層）、足背與足底，共 25 條",
+    "theme": [
+      "#4361ee",
+      "#7209b7"
+    ],
+    "items": [
+      {
+        "name": "脛前肌",
+        "values": [
+          "脛骨外側面上半、骨間膜",
+          "內側楔骨與第 1 蹠骨底",
+          "小腿前群",
+          "腓深神經",
+          "走路時把腳尖勾起來不拖地（背屈），也讓腳底朝內（內翻）"
+        ],
+        "memo": "腓深神經受損會「垂足」，走路腳尖拖地（考過兩次）"
+      },
+      {
+        "name": "伸拇趾長肌",
+        "values": [
+          "腓骨前面中段、骨間膜",
+          "拇趾的遠節趾骨",
+          "小腿前群",
+          "腓深神經",
+          "把大拇趾翹起來，也幫忙勾腳尖（伸拇趾＋背屈）"
+        ],
+        "memo": "前群三兄弟都會勾腳尖：脛前、伸拇趾長、伸趾長"
+      },
+      {
+        "name": "伸趾長肌",
+        "values": [
+          "脛骨外髁、腓骨前面、骨間膜",
+          "第 2～5 趾的趾背",
+          "小腿前群",
+          "腓深神經",
+          "把四根腳趾翹起來，也幫忙勾腳尖（伸趾＋背屈）"
+        ],
+        "memo": "一條肌肉分成四條肌腱，分到四根腳趾"
+      },
+      {
+        "name": "第三腓骨肌",
+        "values": [
+          "腓骨前面下段",
+          "第 5 蹠骨底背面",
+          "小腿前群",
+          "腓深神經",
+          "勾腳尖，同時讓腳底朝外（背屈＋外翻）"
+        ],
+        "memo": "名字叫「腓骨肌」，卻住在前群"
+      },
+      {
+        "name": "腓骨長肌",
+        "values": [
+          "腓骨頭與腓骨外側上段",
+          "繞過外踝後方、橫穿足底，止於內側楔骨與第 1 蹠骨底",
+          "小腿外側群",
+          "腓淺神經",
+          "讓腳底朝外（外翻），也幫忙踮腳（蹠屈）"
+        ],
+        "memo": "肌腱橫穿足底到第 1 蹠骨（考過）；不負責背屈（考過）"
+      },
+      {
+        "name": "腓骨短肌",
+        "values": [
+          "腓骨外側下段",
+          "第 5 蹠骨粗隆",
+          "小腿外側群",
+          "腓淺神經",
+          "讓腳底朝外（外翻）"
+        ],
+        "memo": "不連接跟腱（考過）"
+      },
+      {
+        "name": "腓腸肌",
+        "values": [
+          "股骨內髁與外髁的後面（兩個頭）",
+          "經跟腱止於跟骨",
+          "小腿後群淺層",
+          "脛神經",
+          "踮腳尖、跳起來（蹠屈），也幫忙彎膝蓋"
+        ],
+        "memo": "小腿肚的兩坨肉；跨膝和踝兩個關節，是膕窩的下界"
+      },
+      {
+        "name": "比目魚肌",
+        "values": [
+          "腓骨頭後面與腓骨上段、脛骨比目魚肌線",
+          "經跟腱止於跟骨",
+          "小腿後群淺層",
+          "脛神經",
+          "久站時穩住身體不往前倒、踮腳（蹠屈）"
+        ],
+        "memo": "起點在腓骨頭後側（考過）、止點在跟骨（考過）"
+      },
+      {
+        "name": "蹠肌",
+        "values": [
+          "股骨外上髁線",
+          "跟骨（隨跟腱）",
+          "小腿後群淺層",
+          "脛神經",
+          "輕微幫忙踮腳和彎膝（蹠屈、屈膝）"
+        ],
+        "memo": "肌腹小小一塊，肌腱卻很長（考過肌腱最長）"
+      },
+      {
+        "name": "膕肌",
+        "values": [
+          "股骨外髁外側",
+          "脛骨後面上段",
+          "小腿後群深層",
+          "脛神經",
+          "從站直到要彎膝蓋時，先把膝蓋「解鎖」"
+        ],
+        "memo": "是膕窩的底，不是膕窩的界線（考過）"
+      },
+      {
+        "name": "脛後肌",
+        "values": [
+          "脛骨與腓骨後面、骨間膜",
+          "舟狀骨粗隆與其他跗骨、蹠骨底",
+          "小腿後群深層",
+          "脛神經",
+          "讓腳底朝內（內翻），也幫忙踮腳（蹠屈）"
+        ],
+        "memo": "內踝後方由前到後：「脛後、屈趾長、動靜脈與神經、屈拇趾長」"
+      },
+      {
+        "name": "屈趾長肌",
+        "values": [
+          "脛骨後面",
+          "第 2～5 趾的遠節趾骨",
+          "小腿後群深層",
+          "脛神經",
+          "用腳趾抓地，像用腳趾夾毛巾（屈趾）"
+        ],
+        "memo": "足底的蹠方肌和蚓狀肌都掛在我的肌腱上"
+      },
+      {
+        "name": "屈拇趾長肌",
+        "values": [
+          "腓骨後面下段、骨間膜",
+          "拇趾的遠節趾骨",
+          "小腿後群深層",
+          "脛神經",
+          "走路蹬地的最後一下用大拇趾推（屈拇趾）"
+        ],
+        "memo": "起點在腓骨，卻跑到拇趾那一側"
+      },
+      {
+        "name": "伸趾短肌",
+        "values": [
+          "跟骨上外側面",
+          "第 2～4 趾的伸趾長肌腱（拇趾那條叫伸拇趾短肌）",
+          "足背肌",
+          "腓深神經",
+          "在鞋子裡把腳趾翹起來（伸趾）"
+        ],
+        "memo": "和伸拇趾短肌一起位於足背，都是腓深神經支配。"
+      },
+      {
+        "name": "伸拇趾短肌",
+        "values": [
+          "跟骨上外側面（和伸趾短肌同一個起點）",
+          "拇趾的近節趾骨底背面",
+          "足背肌",
+          "腓深神經",
+          "在鞋子裡把大拇趾翹起來（伸拇趾）"
+        ],
+        "memo": "其實是伸趾短肌最內側的那一束；足背肌只有我們兩條，都是腓深神經"
+      },
+      {
+        "name": "外展拇趾肌",
+        "values": [
+          "跟骨內側結節",
+          "拇趾的近節趾骨",
+          "足底肌",
+          "足底內側神經",
+          "把大拇趾往內側張開（外展拇趾）"
+        ],
+        "memo": "第一層；神經是足底「內側」，不是外側（考過）"
+      },
+      {
+        "name": "屈趾短肌",
+        "values": [
+          "跟骨內側結節",
+          "第 2～5 趾的中節趾骨",
+          "足底肌",
+          "足底內側神經",
+          "彎曲腳趾中間那一節（屈趾）"
+        ],
+        "memo": "第一層正中央，起於跟骨（考過）"
+      },
+      {
+        "name": "外展小趾肌",
+        "values": [
+          "跟骨內側與外側結節",
+          "小趾的近節趾骨",
+          "足底肌",
+          "足底外側神經",
+          "把小趾往外側張開（外展小趾）"
+        ],
+        "memo": "第一層三塊都起於跟骨"
+      },
+      {
+        "name": "蹠方肌",
+        "values": [
+          "跟骨內側與外側面",
+          "屈趾長肌的肌腱",
+          "足底肌",
+          "足底外側神經",
+          "把屈趾長肌的拉力拉正，讓腳趾屈得更直（輔助屈趾）"
+        ],
+        "memo": "第二層；起於跟骨、止在肌腱上（考過）"
+      },
+      {
+        "name": "足底蚓狀肌",
+        "values": [
+          "屈趾長肌的肌腱",
+          "第 2～5 趾的趾背伸肌腱膜",
+          "足底肌",
+          "兩條：第 1 條是足底內側神經，其餘是足底外側神經",
+          "彎曲蹠趾關節、伸直趾間關節"
+        ],
+        "memo": "第二層；起於肌腱、不附著跟骨（考過）；和手的蚓狀肌一樣掛在深屈肌腱上",
+        "mixedKey": true
+      },
+      {
+        "name": "屈拇趾短肌",
+        "values": [
+          "骰骨與外側楔骨的足底面",
+          "拇趾的近節趾骨",
+          "足底肌",
+          "足底內側神經",
+          "彎曲大拇趾根部（屈拇趾）"
+        ],
+        "memo": "第三層；和外展拇趾肌、屈趾短肌一樣是足底內側神經"
+      },
+      {
+        "name": "內收拇趾肌",
+        "values": [
+          "第 2～4 蹠骨底（斜頭）與外側幾個蹠趾關節（橫頭）",
+          "拇趾的近節趾骨",
+          "足底肌",
+          "足底外側神經",
+          "把大拇趾往第 2 趾方向收（內收拇趾）"
+        ],
+        "memo": "第三層；和手的拇收肌一樣，在拇趾那邊卻由外側那條神經支配"
+      },
+      {
+        "name": "屈小趾短肌",
+        "values": [
+          "第 5 蹠骨底",
+          "小趾的近節趾骨",
+          "足底肌",
+          "足底外側神經",
+          "彎曲小趾根部（屈小趾）"
+        ],
+        "memo": "第三層；和手的屈小指短肌對稱"
+      },
+      {
+        "name": "蹠側骨間肌",
+        "values": [
+          "第 3～5 蹠骨內側",
+          "同一根腳趾的近節趾骨內側",
+          "足底肌",
+          "足底外側神經",
+          "把張開的腳趾併攏（內收腳趾）"
+        ],
+        "memo": "第四層；起於蹠骨，不附著跟骨（考過）；足以第 2 趾為軸"
+      },
+      {
+        "name": "足部背側骨間肌",
+        "values": [
+          "相鄰兩根蹠骨的相對面",
+          "第 2～4 趾的近節趾骨",
+          "足底肌",
+          "足底外側神經",
+          "把腳趾往外張開（外展腳趾）"
+        ],
+        "memo": "第四層；背側外展（DAB），腳以第 2 趾為軸"
+      }
+    ],
+    "landmarks": [
+      {
+        "name": "跟骨後面（經過跟腱）",
+        "where": "腳跟的後面",
+        "blocks": [
+          {
+            "icon": "⬆️",
+            "dir": "從腳跟後面經跟腱往上拉",
+            "act": "踮腳尖（蹠屈）",
+            "m": [
+              "腓腸肌",
+              "比目魚肌",
+              "蹠肌"
+            ]
+          }
+        ],
+        "answers": [
+          "腓腸肌",
+          "比目魚肌",
+          "蹠肌"
+        ],
+        "tip": "腓骨短肌不連跟腱（考過）"
+      },
+      {
+        "name": "跟骨的足底面",
+        "where": "腳跟底下",
+        "blocks": [
+          {
+            "icon": "➡️",
+            "dir": "從腳跟往前拉向腳趾",
+            "act": "撐住足弓、彎曲或張開腳趾",
+            "m": [
+              "外展拇趾肌",
+              "屈趾短肌",
+              "外展小趾肌",
+              "蹠方肌"
+            ]
+          }
+        ],
+        "answers": [
+          "外展拇趾肌",
+          "屈趾短肌",
+          "外展小趾肌",
+          "蹠方肌"
+        ]
+      },
+      {
+        "name": "內側楔骨與第 1 蹠骨底",
+        "where": "腳背內側、大拇趾根部後方",
+        "blocks": [
+          {
+            "icon": "⬆️",
+            "dir": "從小腿前面往下拉",
+            "act": "勾腳尖＋腳底朝內（背屈＋內翻）",
+            "m": [
+              "脛前肌"
+            ]
+          },
+          {
+            "icon": "⬅️",
+            "dir": "從外踝後面穿過足底拉過來",
+            "act": "腳底朝外（外翻）",
+            "m": [
+              "腓骨長肌"
+            ]
+          }
+        ],
+        "answers": [
+          "脛前肌",
+          "腓骨長肌"
+        ],
+        "tip": "一內一外拉同一點，像馬鐙吊住足弓",
+        "ask": "哪兩條肌肉的止點同時包含內側楔骨與第 1 蹠骨底？（請選出兩條）"
+      },
+      {
+        "name": "第 5 蹠骨底",
+        "where": "腳外側中段摸得到的突起",
+        "blocks": [
+          {
+            "icon": "↗️",
+            "dir": "從腳的外側拉",
+            "act": "腳底朝外（外翻）",
+            "m": [
+              "腓骨短肌",
+              "第三腓骨肌"
+            ]
+          }
+        ],
+        "answers": [
+          "腓骨短肌",
+          "第三腓骨肌"
+        ],
+        "ask": "哪些小腿肌肉止在第 5 蹠骨底？（請全部選出來）"
+      },
+      {
+        "name": "內踝後方（肌腱經過的路）",
+        "where": "腳踝內側骨頭的後面",
+        "blocks": [
+          {
+            "icon": "↩️",
+            "dir": "從踝關節後內側繞過",
+            "act": "腳底朝內、彎腳趾、踮腳",
+            "m": [
+              "脛後肌",
+              "屈趾長肌",
+              "屈拇趾長肌"
+            ]
+          }
+        ],
+        "answers": [
+          "脛後肌",
+          "屈趾長肌",
+          "屈拇趾長肌"
+        ],
+        "tip": "由前到後：脛後、屈趾長、血管神經、屈拇趾長",
+        "ask": "請問哪些肌肉的肌腱從這裡經過？（請全部選出來）"
+      },
+      {
+        "name": "屈趾長肌的肌腱",
+        "where": "足底往四根腳趾走的深層肌腱",
+        "blocks": [
+          {
+            "icon": "➡️",
+            "dir": "掛在屈趾長肌的肌腱上",
+            "act": "幫忙彎腳趾",
+            "m": [
+              "蹠方肌",
+              "足底蚓狀肌"
+            ]
+          }
+        ],
+        "answers": [
+          "蹠方肌",
+          "足底蚓狀肌"
+        ]
+      },
+      {
+        "name": "腓骨頭（小腿肌肉的起點）",
+        "where": "膝蓋外側下方摸得到的小骨頭",
+        "blocks": [
+          {
+            "icon": "⬇️",
+            "dir": "沿著小腿外側往下",
+            "act": "腳底朝外（外翻）",
+            "m": [
+              "腓骨長肌"
+            ]
+          },
+          {
+            "icon": "⬇️",
+            "dir": "往後下走到跟腱",
+            "act": "踮腳（蹠屈）",
+            "m": [
+              "比目魚肌"
+            ]
+          }
+        ],
+        "answers": [
+          "腓骨長肌",
+          "比目魚肌"
+        ],
+        "ask": "哪些小腿肌肉從腓骨頭出發？（請全部選出來）"
+      },
+      {
+        "name": "跟骨上外側面（足背）",
+        "where": "腳背靠外側、腳跟前方",
+        "blocks": [
+          {
+            "icon": "➡️",
+            "dir": "從腳背外側往前拉到腳趾",
+            "act": "翹起腳趾",
+            "m": [
+              "伸趾短肌",
+              "伸拇趾短肌"
+            ]
+          }
+        ],
+        "answers": [
+          "伸趾短肌",
+          "伸拇趾短肌"
+        ]
+      }
+    ]
+  }
+}
+});
+</script>
+<script>
+// ---------- 設定 ----------
+const ROUNDS_NORMAL = 8;
+// 老師試玩模式：在首頁最下面輸入這組代碼開啟，所有關卡直接開放、每局只出 3 題，成績不會上傳雲端
+// 原始碼裡只放代碼的雜湊值，打開檔案看不到老師代碼；要換代碼就重新計算 TEACHER_HASH
+const TEACHER_HASH = "5r8cqb";
+const codeHash = s => { let x = 0x811c9dc5; for (const c of "guess-teacher:" + s){ x ^= c.codePointAt(0); x = Math.imul(x, 0x01000193) >>> 0; } return x.toString(36); };
+const isTeacher = () => load("guess-teacher", false) === true;
+const rounds = () => isTeacher() ? 3 : ROUNDS_NORMAL;
+const BASE = 50, PER_UNUSED_HINT = 10, FIRST_TRY = 10, COMBO_STEP = 10, COMBO_MAX = 50, BONUS = 20;
+// 預計的三個科目；還沒有資料檔的會顯示「即將推出」
+const PLANNED = [["anatomy","肌肉解剖","💪"],["physiology","生理學","🫀"],["pathology","病理學","🔬"]];
+const TITLES = [[900,"國考之神"],[650,"神探"],[400,"明日之星"],[0,"潛力新星"]];
+const MEDALS = [[0,"🌱 醫學新手"],[200,"🥉 銅牌學霸"],[800,"🥈 銀牌學霸"],[2000,"🥇 金牌學霸"],[4000,"👑 國考之神"]];
+const STAMP = ["未收集","🥉 銅章","🥈 銀章","🥇 金章"];
+const AVATARS = ["💪","🦴","🧠","🫀","🦵","👅","🔬","🩺"];
+const CHEERS = {
+  noHint: ["沒看任何提示就猜中？！你是天才吧！🎉","一眼看穿！神探就是你！🕵️","這也太強了吧！國考直接送分給你！","一出手就知道？老師都要為你鼓掌！👏"],
+  fewHint: ["太厲害了！🎉","漂亮！完全正確！✨","答對啦！你越來越強了！💪","就是它！你的推理太精準了！🎯"],
+  manyHint: ["答對了！一步一步推出來，超棒！🌟","猜中了！這樣推理就對了！👍","讚！線索都被你用得剛剛好！✨"],
+  combo: ["連擊停不下來！🔥","手感火燙！誰都擋不住你！🔥🔥","連續答對！這是什麼神仙手感！🚀"],
+  wrong: ["差一點點！再想想～","很接近了！這兩個真的很像 🤏","別灰心，換個角度想想！","不是它，但你的方向沒錯！"],
+  stuck: ["卡住了嗎？挑一種提示看看吧！💡","沒關係，選一個提示，馬上就有頭緒！💡"],
+  skip: ["沒關係！先把它記起來，等一下它會再出現一次 💪","換一題也是策略！先看答案，等一下再挑戰它！"],
+  bonusRight: ["加碼成功！你真的懂了！💯","完美！連這個都知道！🌟","太穩了！加分加分！✨"],
+  bonusWrong: ["沒關係，現在記起來就賺到了！📌","差一點！記住這個，下次就是你的！💪"]
+};
+const pick = a => a[Math.floor(Math.random() * a.length)];
+const shuffle = a => a.map(x => [Math.random(), x]).sort((p, q) => p[0] - q[0]).map(x => x[1]);
+const esc = s => String(s).replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
+const app = document.getElementById("app");
+let S = null;
+
+// ---------- 題目資料的通用讀法 ----------
+const subj = sid => SUBJECTS[sid];
+const unitOf = (sid, uid) => SUBJECTS[sid].units[uid];
+const clueOf = (sub, it, i) => sub.fields[i].clue.replace("{v}", it.values[i]);
+const cluesOf = (sub, it) => it.values.map((_, i) => clueOf(sub, it, i));
+const groupOf = (sub, it) => it.values[sub.groupField];
+const keyOf = (sub, it) => it.values[sub.keyField].split("（")[0];
+const one = sub => "一" + sub.measure + sub.noun;   // 一條肌肉
+const label = i => S.sub.fields[i].label;
+
+// ---------- 儲存（瀏覽器不允許時，改存在這次開啟的記憶體裡） ----------
+const MEM = {};
+function load(key, def){ try { const v = localStorage.getItem(key); return v === null ? def : JSON.parse(v); } catch(e){ return key in MEM ? MEM[key] : def; } }
+function save(key, v){ try { localStorage.setItem(key, JSON.stringify(v)); } catch(e){ MEM[key] = v; } }
+const uk = (sid, uid) => sid + "/" + uid;
+const getWallet = () => load("guess-wallet", 0);
+function getStamps(sid, uid){
+  let s = load("guess2-stamp-" + uk(sid, uid), null);
+  if (!s && sid === "anatomy"){   // 沿用舊版的紀錄
+    s = load("guess-stamp2-" + uid, null);
+    if (!s){ s = {}; load("guess-stamps-" + uid, []).forEach(n => s[n] = 1); }
+  }
+  return s || {};
+}
+const lvl = (sid, uid, n) => getStamps(sid, uid)[n] || 0;
+function raise(sid, uid, n, v){ const s = getStamps(sid, uid), old = s[n] || 0; if (v > old){ s[n] = v; save("guess2-stamp-" + uk(sid, uid), s); } return old; }
+function getBest(sid, uid, mode){
+  const v = load("guess2-best-" + uk(sid, uid) + "-" + mode, null);
+  if (v !== null) return v;
+  return sid === "anatomy" ? load("guess-best-" + uid + (mode === "single" ? "" : "-" + mode), 0) : 0;
+}
+const setBest = (sid, uid, mode, v) => save("guess2-best-" + uk(sid, uid) + "-" + mode, v);
+const unitMin = (sid, uid) => Math.min(...unitOf(sid, uid).items.map(it => lvl(sid, uid, it.name)));
+function stampCounts(sid, uid){ const c = [0,0,0,0]; unitOf(sid, uid).items.forEach(it => c[lvl(sid, uid, it.name)]++); return c; }
+function medalOf(p){ return MEDALS.filter(m => p >= m[0]).pop(); }
+function nextMedal(p){ return MEDALS.find(m => p < m[0]); }
+
+function drawItems(sid, uid, n){
+  const pool = unitOf(sid, uid).items.map((it, i) => ({ i, w: (4 - lvl(sid, uid, it.name)) ** 2 }));
+  const out = [];
+  while (out.length < n && pool.length){
+    let r = Math.random() * pool.reduce((s, p) => s + p.w, 0), j = 0;
+    while (j < pool.length - 1 && r > pool[j].w){ r -= pool[j].w; j++; }
+    out.push(pool[j].i); pool.splice(j, 1);
+  }
+  return out;
+}
+
+// ---------- 雲端存檔 ----------
+const cloudOn = () => typeof CLOUD_URL === "string" && CLOUD_URL.startsWith("https://");
+const getAcct = () => load("guess-account", null);
+let syncState = "";
+const SYNC_TEXT = { syncing: "同步中…", ok: "已同步 ✓", fail: "暫時連不上，下次會再同步" };
+
+async function api(body){
+  const r = await fetch(CLOUD_URL, { method: "POST", body: JSON.stringify(body) });
+  return r.json();
+}
+async function hashPin(id, pin){
+  const raw = "muscle-guess:" + id + ":" + pin;
+  try {
+    const d = await crypto.subtle.digest("SHA-256", new TextEncoder().encode(raw));
+    return [...new Uint8Array(d)].map(b => b.toString(16).padStart(2, "0")).join("");
+  } catch(e){
+    let h = 5381; for (const ch of raw) h = ((h << 5) + h + ch.charCodeAt(0)) | 0;
+    return "x" + (h >>> 0).toString(16);
+  }
+}
+// 匯出全部進度；保留雲端上這個版本還不認得的科目，避免被覆蓋掉
+function exportProgress(){
+  const remote = load("guess2-remote", {});
+  const p = { wallet: getWallet(), stamps: Object.assign({}, remote.stamps), best: Object.assign({}, remote.best) };
+  for (const sid in SUBJECTS) for (const uid in SUBJECTS[sid].units){
+    p.stamps[uk(sid, uid)] = getStamps(sid, uid);
+    for (const mode of ["single","hard","group","landmark"]){ const b = getBest(sid, uid, mode); if (b) p.best[uk(sid, uid) + "-" + mode] = b; }
+  }
+  return p;
+}
+// 合併雲端與這台裝置的進度：點數取大的、印章取高的、最佳紀錄取高的
+function mergeProgress(r){
+  if (!r) return;
+  save("guess2-remote", r);
+  if ((r.wallet || 0) > getWallet()) save("guess-wallet", r.wallet);
+  for (const k in (r.stamps || {})){
+    const [sid, uid] = k.split("/");
+    if (!SUBJECTS[sid] || !SUBJECTS[sid].units[uid]) continue;
+    const s = getStamps(sid, uid);
+    for (const n in r.stamps[k]) if ((r.stamps[k][n] || 0) > (s[n] || 0)) s[n] = r.stamps[k][n];
+    save("guess2-stamp-" + k, s);
+  }
+  for (const k in (r.best || {})){
+    const m = k.match(/^(.+)\/(.+)-(single|hard|group|landmark)$/);
+    if (m && SUBJECTS[m[1]] && SUBJECTS[m[1]].units[m[2]] && r.best[k] > getBest(m[1], m[2], m[3])) setBest(m[1], m[2], m[3], r.best[k]);
+  }
+}
+// 給老師試算表用的單元摘要
+function summary(){
+  const rows = [];
+  for (const sid in SUBJECTS) for (const uid in SUBJECTS[sid].units){
+    const c = stampCounts(sid, uid), tot = unitOf(sid, uid).items.length;
+    const best = Math.max(...["single","hard","group","landmark"].map(m => getBest(sid, uid, m)));
+    if (tot - c[0] > 0 || best > 0) rows.push({ subject: SUBJECTS[sid].name, unit: unitOf(sid, uid).name, total: tot, got: tot - c[0], silver: c[2] + c[3], gold: c[3], best });
+  }
+  return rows;
+}
+function paintSync(){ const el = document.getElementById("sync"); if (el) el.textContent = SYNC_TEXT[syncState] || ""; }
+async function pushProgress(){
+  const a = getAcct();
+  if (!cloudOn() || !a || isTeacher()) return;
+  syncState = "syncing"; paintSync();
+  try {
+    const r = await api({ action: "save", id: a.id, pin: a.pin, progress: exportProgress(), summary: summary() });
+    syncState = r.ok ? "ok" : "fail";
+  } catch(e){ syncState = "fail"; }
+  paintSync();
+}
+async function loadRank(){
+  const box = document.getElementById("rankbox"), a = getAcct();
+  if (!box || !a) return;
+  try {
+    const r = await (await fetch(CLOUD_URL + "?id=" + encodeURIComponent(a.id))).json();
+    if (!r.ok) throw 0;
+    box.innerHTML = `<h2>🏆 全班排行</h2>
+      ${r.top.map((x, i) => `<div class="rank ${x.nick === a.nick && i + 1 === r.myRank ? "me" : ""}"><span>${i + 1}　${esc(x.avatar)} ${esc(x.nick)}</span><span>⭐ ${x.wallet}</span></div>`).join("")}
+      ${r.myRank && r.myRank > 10 ? `<div class="rank me"><span>${r.myRank}　${esc(a.avatar)} ${esc(a.nick)}（你）</span><span>⭐ ${getWallet()}</span></div>` : ""}
+      <p class="muted" style="margin-top:8px">共 ${r.total} 位同學在玩</p>`;
+  } catch(e){ box.innerHTML = `<p class="muted">排行榜暫時載入不了，等一下再看看。</p>`; }
+}
+
+// ---------- 登入頁 ----------
+function loginPage(back){
+  let register = false, avatar = AVATARS[0];
+  function draw(err = ""){
+    app.innerHTML = `
+      <h1>🔐 登入存檔</h1>
+      <p class="muted">用學號和自己設的 4 位數密碼登入。第一次輸入就等於註冊，不需要信箱。換手機、換電腦，輸入同樣的學號和密碼，進度就回來了。</p>
+      <div class="card">
+        <label class="field"><span>學號</span><input id="lid" autocomplete="username" placeholder="例如 B1234567" value="${esc(document.getElementById("lid")?.value || "")}"></label>
+        <label class="field"><span>4 位數字密碼</span><input id="lpin" type="password" inputmode="numeric" maxlength="4" autocomplete="current-password" placeholder="自己設、自己記住" value="${esc(document.getElementById("lpin")?.value || "")}"></label>
+        ${register ? `
+          <p style="font-weight:700;margin-top:6px">第一次來！取個排行榜暱稱，再選一個角色 🎉</p>
+          <label class="field"><span>暱稱（排行榜只顯示暱稱，不會顯示學號）</span><input id="lnick" maxlength="12" placeholder="例如：咬肌小王子"></label>
+          <div class="avas">${AVATARS.map(a => `<button class="${a === avatar ? "on" : ""}" data-a="${a}">${a}</button>`).join("")}</div>` : ""}
+        <div class="err" id="lerr">${err}</div>
+        <div class="row" style="margin-top:8px"><button class="primary" id="lgo">${register ? "建立帳號並存檔" : "登入"}</button><button id="lback">先不用</button></div>
+      </div>`;
+    app.querySelectorAll(".avas button").forEach(b => b.onclick = () => { avatar = b.dataset.a; app.querySelectorAll(".avas button").forEach(x => x.classList.toggle("on", x === b)); });
+    document.getElementById("lback").onclick = back;
+    document.getElementById("lgo").onclick = submit;
+    app.querySelectorAll("input").forEach(i => i.oninput = () => { document.getElementById("lerr").textContent = ""; });
+  }
+  async function submit(){
+    const id = document.getElementById("lid").value.trim(), pinRaw = document.getElementById("lpin").value.trim();
+    const nick = register ? document.getElementById("lnick").value.trim() : "";
+    const errEl = document.getElementById("lerr");
+    if (!/^[A-Za-z0-9]{4,20}$/.test(id)){ errEl.textContent = "學號請輸入 4～20 個英文字母或數字"; return; }
+    if (!/^\d{4}$/.test(pinRaw)){ errEl.textContent = "密碼請輸入 4 位數字"; return; }
+    if (register && !nick){ errEl.textContent = "幫自己取個暱稱吧！"; return; }
+    errEl.textContent = "連線中…";
+    try {
+      const pin = await hashPin(id, pinRaw);
+      const r = await api(register ? { action: "login", id, pin, nick, avatar } : { action: "login", id, pin });
+      if (r.needRegister){ register = true; draw(); return; }
+      if (!r.ok){ errEl.textContent = r.error === "密碼不對" ? "密碼不對喔，再試一次" : (r.error || "登入失敗"); return; }
+      save("guess-account", { id, pin, nick: r.nick, avatar: r.avatar || avatar });
+      mergeProgress(r.progress);
+      await pushProgress();
+      launch(3);
+      back();
+    } catch(e){ errEl.textContent = "連不上雲端，請確認網路後再試一次"; }
+  }
+  draw();
+}
+
+// ---------- 煙火 ----------
+const fx = document.getElementById("fx"), ctx = fx.getContext("2d");
+let parts = [], rockets = [], running = false;
+function sizeFx(){ fx.width = innerWidth * devicePixelRatio; fx.height = innerHeight * devicePixelRatio; ctx.setTransform(devicePixelRatio, 0, 0, devicePixelRatio, 0, 0); }
+addEventListener("resize", sizeFx); sizeFx();
+const FX_COLORS = ["#ff5d8f","#ff9f1c","#ffd23f","#2ec4b6","#3a86ff","#8338ec","#ff006e","#06d6a0"];
+function launch(n = 2){
+  for (let k = 0; k < n; k++){
+    setTimeout(() => {
+      rockets.push({ x: innerWidth * (0.15 + Math.random() * 0.7), y: innerHeight, vy: -(innerHeight * 0.017 + Math.random() * 4), ty: innerHeight * (0.15 + Math.random() * 0.3), c: pick(FX_COLORS) });
+      if (!running){ running = true; requestAnimationFrame(tick); }
+    }, k * 260);
+  }
+}
+function burst(x, y, c){
+  for (let i = 0, n = 70; i < n; i++){
+    const a = (Math.PI * 2 * i) / n, s = 2 + Math.random() * 4;
+    parts.push({ x, y, vx: Math.cos(a) * s, vy: Math.sin(a) * s, life: 1, c: Math.random() < 0.3 ? pick(FX_COLORS) : c });
+  }
+}
+function tick(){
+  ctx.clearRect(0, 0, innerWidth, innerHeight);
+  rockets = rockets.filter(r => {
+    r.y += r.vy; r.vy *= 0.985;
+    ctx.fillStyle = r.c; ctx.beginPath(); ctx.arc(r.x, r.y, 3, 0, 7); ctx.fill();
+    if (r.y <= r.ty || r.vy > -1){ burst(r.x, r.y, r.c); return false; }
+    return true;
+  });
+  parts = parts.filter(p => {
+    p.x += p.vx; p.y += p.vy; p.vy += 0.06; p.vx *= 0.985; p.life -= 0.012;
+    ctx.globalAlpha = Math.max(p.life, 0); ctx.fillStyle = p.c;
+    ctx.beginPath(); ctx.arc(p.x, p.y, 2.6, 0, 7); ctx.fill(); ctx.globalAlpha = 1;
+    return p.life > 0;
+  });
+  if (rockets.length || parts.length) requestAnimationFrame(tick);
+  else { running = false; ctx.clearRect(0, 0, innerWidth, innerHeight); }
+}
+function floatText(t){
+  const el = document.createElement("div");
+  el.className = "float"; el.textContent = t;
+  el.style.left = innerWidth / 2 - 40 + "px"; el.style.top = innerHeight * 0.3 + "px";
+  document.body.appendChild(el); setTimeout(() => el.remove(), 1300);
+}
+
+// ---------- 首頁 ----------
+function topbar(){
+  if (!cloudOn()) return "";
+  const a = getAcct();
+  return a
+    ? `<div class="topbar"><span class="who"><span class="ava">${esc(a.avatar)}</span>${esc(a.nick)} <span class="sync" id="sync">${SYNC_TEXT[syncState] || ""}</span></span><button class="linkbtn" id="logout">登出</button></div>`
+    : `<div class="topbar"><span class="muted">還沒登入：成績只存在這台裝置</span><button class="linkbtn" id="login">🔐 登入存檔</button></div>`;
+}
+function bindTopbar(){
+  const li = document.getElementById("login"), lo = document.getElementById("logout");
+  if (li) li.onclick = () => loginPage(home);
+  if (lo) lo.onclick = () => { if (confirm("登出後，這台裝置上的成績仍會保留。確定登出？")){ save("guess-account", null); syncState = ""; home(); } };
+}
+
+// 單元的識別色：只用在清單前面的小圓點，顏色都偏柔和
+const DOTS = ["#C2847A", "#8E7DB5", "#6A9C89", "#5E8FB0", "#C9A15A", "#7E8C9E", "#B08EA2", "#7FA37A"];
+function unitStats(sid, uid){
+  const u = unitOf(sid, uid), c = stampCounts(sid, uid), tot = u.items.length;
+  return { tot, got: tot - c[0], silver: c[2] + c[3], gold: c[3], prog: Math.round((c[1] + c[2] * 2 + c[3] * 3) / (tot * 3) * 100) };
+}
+
+function home(){
+  S = null;
+  const w = getWallet(), md = medalOf(w), nx = nextMedal(w);
+  const pct = nx ? Math.round((w - md[0]) / (nx[0] - md[0]) * 100) : 100;
+  app.innerHTML = `
+    ${topbar()}
+    <div class="walletline"><h1>猜猜我是誰</h1><span class="pill star">⭐ ${w}</span></div>
+    <div class="muted">${md[1]}${nx ? `・再 ${nx[0] - w} 點升級為 ${nx[1]}` : "・最高等級"}</div>
+    <div class="bar" style="margin-bottom:6px"><i style="width:${pct}%"></i></div>
+    ${cloudOn() && getAcct() ? `<div class="card" id="rankbox"><p class="muted">排行榜載入中…</p></div>` : ""}
+    ${Object.keys(SUBJECTS).map(sid => `<div class="subject"><h2>${SUBJECTS[sid].icon} ${SUBJECTS[sid].name}</h2><div class="unitlist">
+      ${Object.keys(SUBJECTS[sid].units).map((uid, i) => {
+        const st = unitStats(sid, uid), u = unitOf(sid, uid);
+        return `<div class="urow">
+          <span class="dot" style="background:${DOTS[i % DOTS.length]}"></span>
+          <div class="uinfo"><span class="uname">${u.name}</span><span class="ucount">猜中過 ${st.got}/${st.tot}</span>
+            <div class="bar"><i style="width:${st.prog}%"></i></div></div>
+          <button class="${st.got ? "primary" : ""}" data-s="${sid}" data-u="${uid}">${st.got ? "繼續" : "開始"}</button>
+        </div>`; }).join("")}
+    </div></div>`).join("")}
+    <div class="card rules">
+      <b>怎麼玩</b>：每個單元先看「學習卡片」把正確內容看熟，再去挑戰：看線索猜答案，猜中後還有加碼挑戰。越不熟的越常出現，玩著玩著就記起來了。<br>
+      <b>印章</b>：🥉 猜中一次　🥈 加碼挑戰也全對　🥇 在困難模式也過關。所有關卡一開始就全部開放，想從哪裡玩都可以。<br>
+      <b>計分</b>：猜對 +${BASE}；每少用一個提示 +${PER_UNUSED_HINT}；一次命中 +${FIRST_TRY}；加碼挑戰每題 +${BONUS}；連續答對有連擊加分。猜錯和換題都不扣分。
+    </div>
+    ${PLANNED.filter(([sid]) => !SUBJECTS[sid]).map(([, name, icon]) => `<div class="soon">${icon} ${name}・即將推出</div>`).join("")}
+    <div class="teacher">${isTeacher()
+      ? `<span>🔧 老師試玩模式開啟中：每局只出 3 題，成績不會上傳雲端</span> <button id="tOff">關閉試玩模式</button>`
+      : `<button class="tlink" id="tOpen">老師試玩</button><span id="tForm" hidden> <input id="tCode" inputmode="numeric" maxlength="8" placeholder="輸入代碼"> <button id="tGo">開啟</button> <span class="err" id="tErr"></span></span>`}</div>`;
+  bindTopbar();
+  const tOpen = document.getElementById("tOpen"), tOff = document.getElementById("tOff");
+  if (tOpen){
+    tOpen.onclick = () => { document.getElementById("tForm").hidden = false; document.getElementById("tCode").focus(); };
+    document.getElementById("tGo").onclick = () => {
+      if (codeHash(document.getElementById("tCode").value.trim()) === TEACHER_HASH){ save("guess-teacher", true); home(); }
+      else document.getElementById("tErr").textContent = "代碼不對";
+    };
+  }
+  if (tOff) tOff.onclick = () => { save("guess-teacher", false); home(); };
+  app.querySelectorAll(".urow button").forEach(b => b.onclick = () => unitPage(b.dataset.s, b.dataset.u));
+  loadRank();
+}
+
+// ---------- 單元頁：各種關卡和圖鑑都在這裡 ----------
+function unitPage(sid, uid){
+  S = null;
+  const sub = subj(sid), u = unitOf(sid, uid), st = unitStats(sid, uid), tot = st.tot;
+  const groupName = sub.fields[sub.groupField].label;
+  app.innerHTML = `
+    <div class="row" style="justify-content:space-between"><h1>${u.name}</h1><button id="back">回首頁</button></div>
+    <p class="muted">${u.desc}</p>
+    <h2 style="margin-top:18px">① 先學</h2>
+    <div class="card">
+      <div class="modes" style="margin-top:0">
+        <button class="${st.got ? "" : "primary"}" data-act="study"><span class="mname">📘 學習卡片</span><span class="lock" ${st.got ? "" : 'style="color:#E6F0F4"'}>${tot} ${sub.measure}${sub.noun}的正確卡片，依${groupName}分組</span></button>
+      </div>
+    </div>
+    <h2 style="margin-top:18px">② 再挑戰</h2>
+    <div class="card">
+      <div class="muted">🥉 猜中過 ${st.got}/${tot}　🥈 加碼全對過 ${st.silver}/${tot}　🥇 困難模式也過關 ${st.gold}/${tot}</div>
+      <div class="bar"><i style="width:${st.prog}%"></i></div>
+      <div class="modes">
+        <button class="${st.got ? "primary" : ""}" data-act="single"><span class="mname">🕵️ 一般關</span><span class="lock" ${st.got ? 'style="color:#E6F0F4"' : ""}>先看${sub.firstClues.map(i => sub.fields[i].label).join("和")}再猜</span></button>
+        <button data-act="hard"><span class="mname">🔥 困難模式</span><span class="lock">從比較難的線索開始猜</span></button>
+        <button data-act="group"><span class="mname">🧩 ${groupName}關</span><span class="lock">找臥底、點名</span></button>
+        ${u.landmarks ? `<button data-act="landmark"><span class="mname">📍 地標關</span><span class="lock">看骨頭地標，想想誰附著在這裡</span></button>` : ""}
+        ${(sub.lockedModes || []).map(m => `<button disabled><span class="mname">${m.icon} ${m.name}</span><span class="lock">即將推出</span></button>`).join("")}
+      </div>
+    </div>
+    <p class="muted">最佳紀錄：一般關 ${getBest(sid, uid, "single")} 分・困難模式 ${getBest(sid, uid, "hard")} 分・${groupName}關 ${getBest(sid, uid, "group")} 分${u.landmarks ? `・地標關 ${getBest(sid, uid, "landmark")} 分` : ""}</p>`;
+  document.getElementById("back").onclick = home;
+  app.querySelectorAll(".modes button[data-act]").forEach(b => b.onclick = () => {
+    const a = b.dataset.act;
+    if (a === "single") start(sid, uid, false);
+    else if (a === "hard") start(sid, uid, true);
+    else if (a === "group") startGroup(sid, uid);
+    else if (a === "landmark") startLandmark(sid, uid);
+    else study(sid, uid);
+  });
+  window.scrollTo(0, 0);
+}
+
+// ---------- 一般關／困難模式 ----------
+function newState(sid, uid, mode){
+  return { mode, sid, uid, sub: subj(sid), u: unitOf(sid, uid), done: 0, total: 0, combo: 0, log: [], ups: [], minBefore: unitMin(sid, uid) };
+}
+function start(sid, uid, hard){
+  S = Object.assign(newState(sid, uid, hard ? "hard" : "single"), { hard, queue: drawItems(sid, uid, rounds()), requeued: new Set() });
+  round();
+}
+function round(){
+  const i = S.queue.shift();
+  // 肌群裡只有這一條的，先給肌群等於直接給答案，所以開局不給肌群
+  const it = S.u.items[i], alone = S.u.items.filter(x => groupOf(S.sub, x) === groupOf(S.sub, it)).length === 1;
+  let shown = S.hard ? [S.sub.groupField, pick(S.sub.hardFirstClues)] : S.sub.firstClues.slice();
+  if (alone) shown = shown.filter(f => f !== S.sub.groupField);
+  S.cur = { i, it: S.u.items[i], shown, start: shown.length, wrong: [], finished: false };
+  render();
+}
+const isQuiz = () => S.mode === "group" || S.mode === "landmark";
+const modeLabel = () => S.mode === "landmark" ? "地標關" : S.mode === "group" ? S.sub.fields[S.sub.groupField].label + "關" : S.hard ? "困難模式" : "一般關";
+function hud(){
+  const left = isQuiz() ? S.qs.length - S.qi - (S.cur.finished ? 1 : 0) : S.queue.length + (S.cur && !S.cur.finished ? 1 : 0);
+  return `<div class="hud"><span class="pill">${S.u.name}・${modeLabel()}　已完成 ${S.done}／剩 ${left} 題</span>
+    <span class="row">${S.combo >= 2 ? `<span class="pill combo">🔥 連擊 ×${S.combo}</span>` : ""}<span class="pill star">⭐ ${S.total}</span><button class="pill quit" id="quit">🏠 回首頁</button></span></div>`;
+}
+
+function render(msg = "", cls = ""){
+  const c = S.cur, it = c.it, sub = S.sub;
+  const nF = sub.fields.length;
+  const left = (sub.order || [...Array(nF).keys()]).filter(i => !c.shown.includes(i));
+  app.innerHTML = `
+    ${hud()}
+    <div class="card">
+      <h2>我是哪${one(sub)}？🤔</h2>
+      ${c.shown.map(i => `<div class="clue t${i % 5}"><b>${label(i)}</b><span>${clueOf(sub, it, i)}</span></div>`).join("")}
+      ${left.length ? `
+        <p class="muted" style="margin:12px 0 6px">需要提示嗎？自己挑一種（少用提示，猜中時獎勵越多，還會有加碼挑戰）：</p>
+        <div class="row">${left.map(i => `<button class="hint t${i % 5}" data-i="${i}">💡 看${label(i)}</button>`).join("")}</div>` : ""}
+    </div>
+    <div class="card">
+      <p class="muted" style="margin:0">想好了就點下去：</p>
+      <div class="grid">${S.u.items.map(x => x.name).map(n => `<button data-n="${esc(n)}" class="${c.wrong.includes(n) ? "wrong" : ""}" ${c.wrong.includes(n) ? "disabled" : ""}>${n}</button>`).join("")}</div>
+      <div class="msg ${cls}" id="msg">${msg}</div>
+      <div class="row" style="justify-content:flex-end;margin-top:8px"><button id="skip">換下一題 ⏭️</button></div>
+    </div>`;
+  app.querySelectorAll(".hint").forEach(b => b.onclick = () => { c.shown.push(+b.dataset.i); render(); });
+  app.querySelectorAll(".grid button").forEach(b => b.onclick = () => guess(b.dataset.n));
+  document.getElementById("skip").onclick = skip;
+}
+
+function guess(n){
+  const c = S.cur;
+  if (c.finished) return;
+  if (n !== c.it.name){
+    c.wrong.push(n);
+    const stuck = c.wrong.length >= 2 && c.shown.length < S.sub.fields.length;
+    render(stuck ? pick(CHEERS.stuck) : pick(CHEERS.wrong), "bad");
+    app.querySelector(".grid").classList.add("shake");
+    return;
+  }
+  c.finished = true;
+  S.combo++;
+  const unused = S.sub.fields.length - c.shown.length;
+  c.parts = [["猜對", BASE]];
+  if (unused) c.parts.push([`少用 ${unused} 個提示`, unused * PER_UNUSED_HINT]);
+  if (!c.wrong.length) c.parts.push(["一次命中", FIRST_TRY]);
+  if (S.combo >= 2) c.parts.push([`連擊 ×${S.combo}`, Math.min((S.combo - 1) * COMBO_STEP, COMBO_MAX)]);
+  c.pts = c.parts.reduce((s, p) => s + p[1], 0);
+  S.total += c.pts;
+  c.cheer = S.combo >= 3 ? pick(CHEERS.combo) : c.shown.length === c.start ? pick(CHEERS.noHint) : c.shown.length <= c.start + 1 ? pick(CHEERS.fewHint) : pick(CHEERS.manyHint);
+  launch(c.shown.length === c.start || S.combo >= 3 ? 4 : 2);
+  floatText("+" + c.pts);
+  c.bonus = S.sub.bonusOrder.filter(i => !c.shown.includes(i)).slice(0, 2);
+  c.bonusOk = 0; c.bj = 0;
+  if (c.bonus.length) showBonus(); else finalize();
+}
+
+function makeOptions(it, f){
+  const right = it.values[f], g = groupOf(S.sub, it);
+  const same = shuffle(S.u.items.filter(x => x.name !== it.name && groupOf(S.sub, x) === g).map(x => x.values[f]));
+  const other = shuffle(S.u.items.filter(x => x.name !== it.name && groupOf(S.sub, x) !== g).map(x => x.values[f]));
+  const opts = [];
+  [...same, ...other].forEach(v => { if (v !== right && !opts.includes(v) && opts.length < 3) opts.push(v); });
+  return shuffle([right, ...opts]);
+}
+
+function showBonus(){
+  const c = S.cur, it = c.it, f = c.bonus[c.bj];
+  app.innerHTML = `
+    ${hud()}
+    <div class="card win">
+      ${c.bj === 0 ? `<div class="cheer">${c.cheer}</div>
+      <h2>答對了！我是${it.name}<span class="badge">${groupOf(S.sub, it)}</span></h2>
+      <div class="pts">${c.parts.map(p => `<span>${p[0]} +${p[1]}</span>`).join("")}</div>` : `<h2>${it.name}<span class="badge">${groupOf(S.sub, it)}</span></h2>`}
+      <div class="bonusq"><span class="tag t${f % 5}">加碼挑戰 ${c.bj + 1}/${c.bonus.length}　+${BONUS}</span>
+        <p style="font-size:18px;font-weight:700;margin:10px 0 6px">那${it.name}的${label(f)}是？</p>
+        ${makeOptions(it, f).map(o => `<button class="opt">${o}</button>`).join("")}
+        <div class="msg" id="bmsg"></div>
+      </div>
+    </div>`;
+  app.querySelectorAll(".opt").forEach(b => b.onclick = () => {
+    const ok = b.textContent === it.values[f];
+    app.querySelectorAll(".opt").forEach(x => { x.disabled = true; if (x.textContent === it.values[f]) x.classList.add("right"); });
+    if (ok){ c.bonusOk++; S.total += BONUS; launch(1); floatText("+" + BONUS); }
+    else b.classList.add("wrong");
+    const last = c.bj === c.bonus.length - 1;
+    document.getElementById("bmsg").innerHTML = `<span class="${ok ? "goodtxt" : "badtxt"}">${ok ? pick(CHEERS.bonusRight) : pick(CHEERS.bonusWrong)}</span>
+      <div class="row" style="margin-top:10px"><button class="primary" id="bnext">${last ? "看完整卡片 ➜" : "下一題加碼 ➜"}</button></div>`;
+    document.getElementById("bnext").onclick = () => { if (last) finalize(); else { c.bj++; showBonus(); } };
+  });
+}
+
+function finalize(){
+  const c = S.cur, it = c.it;
+  const allBonus = c.bonus.length > 0 && c.bonusOk === c.bonus.length;
+  const earned = S.hard ? (allBonus ? 3 : 2) : (allBonus ? 2 : 1);
+  const old = raise(S.sid, S.uid, it.name, earned), now = Math.max(old, earned);
+  c.saved = true;
+  const up = now > old ? (old === 0 ? `🎖️ 新收集：${it.name}！拿到 ${STAMP[now]}` : `🎖️ ${it.name} 升級為 ${STAMP[now]}！`) : "";
+  if (up) S.ups.push(`${it.name} ${STAMP[now]}`);
+  const total = c.pts + c.bonusOk * BONUS;
+  S.done++;
+  S.log.push({ name: it.name, pts: total, hints: c.shown.length - c.start, skipped: false, bonus: `${c.bonusOk}/${c.bonus.length}` });
+  if (up && old > 0) launch(2);
+  reveal(true, total, up, allBonus || !c.bonus.length ? "" : `想拿 ${STAMP[Math.min(now + 1, 3)]}？下次加碼挑戰全部答對就行！`);
+}
+
+function skip(){
+  const c = S.cur;
+  if (c.finished) return;
+  c.finished = true;
+  S.combo = 0;
+  const again = !S.requeued.has(c.i);
+  if (again){ S.requeued.add(c.i); S.queue.push(c.i); }
+  else { S.done++; S.log.push({ name: c.it.name, pts: 0, hints: c.shown.length - c.start, skipped: true }); }
+  c.cheer = again ? pick(CHEERS.skip) : "沒關係！看完答案，下次一定記得 💪";
+  reveal(false);
+}
+
+function cardDetail(sub, it){
+  return `<dl class="reveal">${(sub.order || sub.fields.map((_, i) => i)).map(i => `<dt>${sub.fields[i].label}</dt><dd>${clueOf(sub, it, i)}</dd>`).join("")}</dl>
+    <div class="mem">💡 記憶聯想：${it.memo}</div>`;
+}
+
+function reveal(correct, total = 0, up = "", tip = ""){
+  const c = S.cur, it = c.it;
+  const last = S.queue.length === 0;
+  app.innerHTML = `
+    ${hud()}
+    <div class="card ${correct ? "win" : ""}">
+      ${correct ? `<h2>${it.name}<span class="badge">${groupOf(S.sub, it)}</span><span class="badge stampb">${STAMP[lvl(S.sid, S.uid, it.name)]}</span></h2>
+        <div class="pts"><span class="sum">這題共 +${total}</span>${c.bonus.length ? `<span>加碼 ${c.bonusOk}/${c.bonus.length}</span>` : ""}</div>`
+      : `<div class="cheer soft">${c.cheer}</div><h2>答案是：${it.name}<span class="badge">${groupOf(S.sub, it)}</span></h2>`}
+      ${up ? `<div class="newstamp">${up}</div>` : ""}
+      ${tip ? `<p class="muted" style="margin-top:8px">${tip}</p>` : ""}
+      ${cardDetail(S.sub, it)}
+      <div class="row" style="margin-top:14px"><button class="primary" id="next">${last ? "看結果 🎆" : "下一題 ➜"}</button></div>
+    </div>`;
+  document.getElementById("next").onclick = () => last ? finish() : round();
+}
+
+// ---------- 結算 ----------
+function finish(){
+  const best = getBest(S.sid, S.uid, S.mode), isBest = S.total > best;
+  if (isBest) setBest(S.sid, S.uid, S.mode, S.total);
+  const before = getWallet(), after = before + S.total;
+  save("guess-wallet", after);
+  S.saved = true;
+  const up = medalOf(after)[0] > medalOf(before)[0] ? medalOf(after)[1] : "";
+  const title = TITLES.find(t => S.total >= t[0])[1];
+  const later = S.log.filter(l => isQuiz() ? !l.ok : (l.skipped || l.hints >= 3));
+  const c = stampCounts(S.sid, S.uid), tot = S.u.items.length, sub = S.sub;
+  const askSave = cloudOn() && !getAcct();
+  launch(up || isBest ? 9 : 6);
+  app.innerHTML = `
+    <div class="cheer">恭喜完成！你今天又更接近國考高分了 🎆</div>
+    <h1>${S.u.name}・${modeLabel()}：${S.total} 分</h1>
+    <p>稱號：<b>${title}</b>${isBest ? `<span class="badge">新紀錄！</span>` : `<span class="muted">　最佳紀錄 ${best} 分</span>`}</p>
+    ${askSave ? `<div class="card savebox"><b>想保留這次的印章和點數嗎？</b><br>登入後換手機也能接著玩，還能上全班排行榜！
+      <div class="row" style="margin-top:10px"><button class="primary" id="savego">🔐 登入並存檔</button><button id="savelater">先不用</button></div></div>` : ""}
+    <div class="card wallet">
+      <div>點數 +${S.total}${cloudOn() && getAcct() ? `　<span class="sync" id="sync">${SYNC_TEXT[syncState] || ""}</span>` : ""}</div>
+      <div class="big">⭐ ${after}</div>
+      ${up ? `<div class="newstamp">🎉 升級了！你現在是 ${up}</div>` : `<div style="font-size:14px">${nextMedal(after) ? `再 ${nextMedal(after)[0] - after} 點升級為 ${nextMedal(after)[1]}` : "最高等級！"}</div>`}
+      <div style="font-size:14px;margin-top:6px">${S.u.name}印章：🥉 猜中過 ${tot - c[0]}　🥈 加碼全對過 ${c[2] + c[3]}　🥇 困難模式也過關 ${c[3]}（共 ${tot}）</div>
+      ${S.ups.length ? `<div style="font-size:14px">這局升級：${S.ups.join("、")}</div>` : ""}
+    </div>
+    <div class="card">
+      <table>${S.log.map(l => `<tr><td>${l.name}</td><td class="muted">${isQuiz() ? (l.ok ? "答對 ✨" : "看了答案") : l.skipped ? "換過題" : `${l.hints ? `用了 ${l.hints} 個提示` : "零提示 ✨"}${l.bonus ? `・加碼 ${l.bonus}` : ""}`}</td><td>${l.pts ? "+" + l.pts : "—"}</td></tr>`).join("")}</table>
+    </div>
+    ${later.length ? `<div class="card"><h2>下次再挑戰 💪</h2><p>${later.map(l => l.name).join("、")}</p><p class="muted">去「學習卡片」再看一次，下一局一定能秒殺！</p></div>` : `<div class="card"><h2>全部輕鬆過關！🏆</h2><p class="muted">太強了！試試困難模式或${sub.fields[sub.groupField].label}關，把印章升到金章！</p></div>`}
+    <div class="row"><button class="primary" id="again">再玩一次</button><button id="dexb">📘 學習卡片</button><button id="unitb">回單元</button><button id="home">回首頁</button></div>`;
+  const sid = S.sid, uid = S.uid, mode = S.mode;
+  document.getElementById("again").onclick = () => mode === "landmark" ? startLandmark(sid, uid) : mode === "group" ? startGroup(sid, uid) : start(sid, uid, mode === "hard");
+  document.getElementById("dexb").onclick = () => study(sid, uid);
+  document.getElementById("unitb").onclick = () => unitPage(sid, uid);
+  document.getElementById("home").onclick = home;
+  if (askSave){
+    document.getElementById("savego").onclick = () => loginPage(home);
+    document.getElementById("savelater").onclick = e => e.target.closest(".savebox").remove();
+  }
+  pushProgress();
+}
+
+// ---------- 分類關（解剖學叫肌群關） ----------
+function groupQuestions(){
+  const sub = S.sub, items = S.u.items, m = sub.measure, keyLabel = sub.fields[sub.keyField].label;
+  const byGroup = {}, byKey = {};
+  items.forEach(it => { (byGroup[groupOf(sub, it)] = byGroup[groupOf(sub, it)] || []).push(it); (byKey[keyOf(sub, it)] = byKey[keyOf(sub, it)] || []).push(it); });
+  const big = o => Object.entries(o).filter(([, v]) => v.length >= 3);
+  const gens = [];
+  big(byGroup).forEach(([g, ms]) => gens.push(() => {
+    const three = shuffle(ms).slice(0, 3), out = pick(items.filter(x => groupOf(sub, x) !== g));
+    return { type: "one", label: "找臥底", q: `下面哪一${m}「不屬於」${g}？`, opts: shuffle([...three, out]).map(x => x.name), ans: [out.name],
+      explain: `${out.name} 屬於${groupOf(sub, out)}。${g}的成員有：${ms.map(x => x.name).join("、")}。` };
+  }));
+  big(byKey).forEach(([k, ms]) => gens.push(() => {
+    const three = shuffle(ms).slice(0, 3), out = pick(items.filter(x => keyOf(sub, x) !== k && !x.mixedKey));
+    const four = shuffle([...three, out]);
+    return { type: "one", label: "找臥底", q: `下面哪一${m}的${keyLabel}跟其他三${m}「不一樣」？`, opts: four.map(x => x.name), ans: [out.name],
+      explain: four.map(x => `${x.name}：${x.values[sub.keyField]}`).join("<br>") };
+  }));
+  Object.entries(byGroup).filter(([, v]) => v.length >= 2).forEach(([g, ms]) => gens.push(() => {
+    const others = shuffle(items.filter(x => groupOf(sub, x) !== g)).slice(0, Math.max(6 - ms.length, 2));
+    return { type: "multi", label: "點名", q: `${g}有哪幾${m}？請全部選出來`, opts: shuffle([...ms, ...others]).map(x => x.name), ans: ms.map(x => x.name),
+      explain: `${g}：${ms.map(x => `${x.name}（${keyOf(sub, x)}）`).join("、")}` };
+  }));
+  const qs = [], seen = new Set();
+  for (let guard = 0; qs.length < rounds() && guard < 200 && gens.length; guard++){
+    const q = pick(gens)();
+    const key = q.q + q.opts.slice().sort().join();
+    if (!seen.has(key)){ seen.add(key); qs.push(q); }
+  }
+  return qs;
+}
+
+// ---------- 地標關：從骨頭地標反查附著的肌肉，附肌動學說明 ----------
+const LANDMARK_ASK = "請問哪些肌肉附著在這裡？（可能不只一條，請全部選出來）";
+const LANDMARK_NOTE = "請依本遊戲介紹的肌肉作答，並注意題目問的是起點、止點，還是肌腱經過的位置。";
+// 一個方向一行：作答前只顯示方向和動作，答完才填入肌肉名稱
+function lmBlocks(L, reveal){
+  return L.blocks.map(b => `<div class="lmrow">
+    <div class="lmdir"><span class="lmicon">${b.icon}</span><b>${b.dir}</b> → ${b.act}</div>
+    ${b.m.length ? `<div class="lmmus">${reveal ? b.m.map(n => `<span class="mchip">${n}</span>`).join("") : b.m.map(() => `<span class="mchip q">？</span>`).join("")}${reveal && b.note ? `<span class="lmnote">${b.note}</span>` : ""}</div>` : ""}
+  </div>`).join("");
+}
+function landmarkQuestions(){
+  const items = S.u.items;
+  return shuffle(S.u.landmarks).slice(0, rounds()).map((L, i) => {
+    const others = shuffle(items.filter(x => !L.answers.includes(x.name)));
+    const opts = shuffle([...L.answers, ...others.slice(0, Math.max(7 - L.answers.length, 3)).map(x => x.name)]);
+    return { type: "multi", label: "地標關", q: L.ask || LANDMARK_ASK, opts, ans: L.answers,
+      intro: `${i === 0 ? `<p class="muted">${LANDMARK_NOTE}</p>` : ""}<div class="lmbox"><div class="lmname">📍 ${L.name}</div><div class="lmwhere">在哪裡：${L.where}</div>${lmBlocks(L, false)}</div>`,
+      explainHtml: `<div class="lmbox">${lmBlocks(L, true)}${L.tip ? `<div class="lmtip">💡 ${L.tip}</div>` : ""}</div>`,
+      logName: L.name };
+  });
+}
+function startLandmark(sid, uid){
+  S = Object.assign(newState(sid, uid, "landmark"), { qi: 0 });
+  S.qs = landmarkQuestions();
+  S.cur = { finished: false, wrong: [], sel: [] };
+  renderGroup();
+}
+
+function startGroup(sid, uid){
+  S = Object.assign(newState(sid, uid, "group"), { qi: 0 });
+  S.qs = groupQuestions();
+  S.cur = { finished: false, wrong: [], sel: [] };
+  renderGroup();
+}
+
+function renderGroup(msg = "", cls = ""){
+  const q = S.qs[S.qi], c = S.cur;
+  app.innerHTML = `
+    ${hud()}
+    <div class="card">
+      <span class="tag ${q.type === "multi" ? "t2" : "t4"}">${S.mode === "landmark" ? "📍" : "🧩"} ${q.label}</span>
+      ${q.intro || ""}
+      <h2 style="margin-top:10px">${q.q}</h2>
+      <div class="grid">${q.opts.map(o => `<button data-n="${esc(o)}" class="${c.wrong.includes(o) ? "wrong" : c.sel.includes(o) ? "sel" : ""}" ${c.wrong.includes(o) ? "disabled" : ""}>${o}</button>`).join("")}</div>
+      ${q.type === "multi" ? `<div class="row" style="margin-top:10px"><button class="primary" id="submit">選好了，送出 ✔</button></div>` : ""}
+      <div class="msg ${cls}" id="msg">${msg}</div>
+    </div>`;
+  app.querySelectorAll(".grid button").forEach(b => b.onclick = () => {
+    const n = b.dataset.n;
+    if (q.type === "multi"){ c.sel = c.sel.includes(n) ? c.sel.filter(x => x !== n) : [...c.sel, n]; renderGroup(); return; }
+    if (n === q.ans[0]) groupDone(true); else { c.wrong.push(n); renderGroup(pick(CHEERS.wrong), "bad"); app.querySelector(".grid").classList.add("shake"); }
+  });
+  if (q.type === "multi") document.getElementById("submit").onclick = () => {
+    if (!c.sel.length){ renderGroup("先選至少一個再送出喔！", "bad"); return; }
+    groupDone(c.sel.length === q.ans.length && q.ans.every(a => c.sel.includes(a)));
+  };
+}
+
+function groupDone(ok){
+  const q = S.qs[S.qi], c = S.cur;
+  c.finished = true;
+  let pts = 0, partsHtml = "";
+  if (ok){
+    S.combo++;
+    const ps = [["答對", BASE]];
+    if (!c.wrong.length) ps.push(["一次命中", FIRST_TRY]);
+    if (S.combo >= 2) ps.push([`連擊 ×${S.combo}`, Math.min((S.combo - 1) * COMBO_STEP, COMBO_MAX)]);
+    pts = ps.reduce((s, p) => s + p[1], 0);
+    S.total += pts;
+    partsHtml = `<div class="pts">${ps.map(p => `<span>${p[0]} +${p[1]}</span>`).join("")}<span class="sum">這題 +${pts}</span></div>`;
+    launch(S.combo >= 3 ? 4 : 2); floatText("+" + pts);
+  } else S.combo = 0;
+  S.done++;
+  S.log.push({ name: q.logName ? q.label + "：" + q.logName : q.label + "：" + q.q.replace(/？.*$/, "？"), pts, ok });
+  const last = S.qi === S.qs.length - 1;
+  app.innerHTML = `
+    ${hud()}
+    <div class="card ${ok ? "win" : ""}">
+      <div class="cheer ${ok ? "" : "soft"}">${ok ? (S.combo >= 3 ? pick(CHEERS.combo) : pick(CHEERS.fewHint)) : "差一點！看一下正確答案，下一題扳回來 💪"}</div>
+      <h2>${q.logName ? "📍 " + q.logName : q.q}</h2>
+      ${partsHtml}
+      ${q.explainHtml
+        ? `${!ok ? `<p class="muted">你選的是：${c.sel.join("、")}</p>` : ""}${q.explainHtml}`
+        : `<p>正確答案：<b>${q.ans.join("、")}</b>${!ok && q.type === "multi" ? `<br><span class="muted">你選的是：${c.sel.join("、")}</span>` : ""}</p>
+      <div class="mem">💡 ${q.explain}</div>`}
+      <div class="row" style="margin-top:14px"><button class="primary" id="next">${last ? "看結果 🎆" : "下一題 ➜"}</button></div>
+    </div>`;
+  document.getElementById("next").onclick = () => {
+    if (last) finish();
+    else { S.qi++; S.cur = { finished: false, wrong: [], sel: [] }; renderGroup(); }
+  };
+}
+
+// ---------- 學習卡片：先看正確版本，再去挑戰 ----------
+// 依肌群分段，每段先講「這一群的神經規則和例外」，再列出每一條的完整卡片
+function groupRule(sub, items){
+  const count = {};
+  items.forEach(it => { const k = keyOf(sub, it); count[k] = (count[k] || 0) + 1; });
+  const keys = Object.keys(count).sort((a, b) => count[b] - count[a]);
+  const keyLabel = sub.fields[sub.keyField].label;
+  if (keys.length === 1) return `這一群的${keyLabel}都是 <b>${keys[0]}</b>`;
+  const main = keys[0];
+  if (count[main] < 2) return `這一群的${keyLabel}各不相同，要一條一條記`;
+  const ex = items.filter(it => keyOf(sub, it) !== main);
+  return `這一群的${keyLabel}多半是 <b>${main}</b>；例外：${ex.map(it => `${it.name}（${it.values[sub.keyField]}）`).join("、")}`;
+}
+
+function study(sid, uid, opts = {}){
+  const sub = subj(sid), u = unitOf(sid, uid);
+  const hide = opts.hide !== undefined ? opts.hide : load("guess-study-hide", false);
+  const openSet = opts.open || new Set();
+  const groups = [];
+  u.items.forEach((it, i) => {
+    const g = groupOf(sub, it);
+    let grp = groups.find(x => x.name === g);
+    if (!grp){ grp = { name: g, items: [] }; groups.push(grp); }
+    grp.items.push(Object.assign({ i }, it));
+  });
+  const order = sub.order || sub.fields.map((_, i) => i);
+  app.innerHTML = `
+    <div class="row" style="justify-content:space-between"><h1>📘 ${u.name}學習卡片</h1><button id="back">返回</button></div>
+    <p class="muted">先把正確的卡片看熟，再去挑戰。卡片依${sub.fields[sub.groupField].label}分組，每組最上面是這一組的${sub.fields[sub.keyField].label}規則和例外。</p>
+    <div class="row" style="margin:6px 0 4px">
+      <button class="${hide ? "" : "primary"}" id="showAll">全部展開</button>
+      <button class="${hide ? "primary" : ""}" id="hideAll">只看名稱，自己想再點開</button>
+    </div>
+    ${groups.map(g => `
+      <div class="grp">
+        <h2>${g.name}<span class="ucount">${g.items.length} ${sub.measure}</span></h2>
+        <div class="rule">${groupRule(sub, g.items)}</div>
+        ${g.items.map(it => {
+          const L = lvl(sid, uid, it.name), shown = !hide || openSet.has(it.i);
+          return `<div class="stcard ${shown ? "" : "closed"}" data-i="${it.i}">
+            <div class="sthead"><span class="uname">${it.name}</span>${L ? `<span class="badge stampb">${STAMP[L]}</span>` : ""}${hide ? `<span class="sttoggle">${shown ? "收起" : "點開看答案"}</span>` : ""}</div>
+            ${shown ? `<dl class="reveal">${order.filter(f => f !== sub.groupField).map(f => `<dt>${sub.fields[f].label}</dt><dd>${it.values[f]}</dd>`).join("")}</dl>
+            <div class="mem">💡 ${it.memo}</div>` : ""}
+          </div>`;
+        }).join("")}
+      </div>`).join("")}
+    <div class="card" style="text-align:center">
+      <p>看熟了嗎？去挑戰看看！</p>
+      <div class="row" style="justify-content:center"><button class="primary" id="goPlay">🕵️ 開始一般關</button><button id="back2">回單元</button></div>
+    </div>`;
+  document.getElementById("back").onclick = () => unitPage(sid, uid);
+  document.getElementById("back2").onclick = () => unitPage(sid, uid);
+  document.getElementById("goPlay").onclick = () => start(sid, uid, false);
+  document.getElementById("showAll").onclick = () => { save("guess-study-hide", false); study(sid, uid, { hide: false }); };
+  document.getElementById("hideAll").onclick = () => { save("guess-study-hide", true); study(sid, uid, { hide: true }); };
+  if (hide) app.querySelectorAll(".stcard").forEach(c => c.onclick = () => {
+    const i = +c.dataset.i, y = window.scrollY;
+    openSet.has(i) ? openSet.delete(i) : openSet.add(i);
+    study(sid, uid, { hide: true, open: openSet });
+    window.scrollTo(0, y);
+  });
+  if (!opts.open) window.scrollTo(0, 0);
+}
+
+// ---------- 中途回首頁：這局已拿到的分數照樣存，猜中的至少保住印章 ----------
+function quit(){
+  if (S && !S.saved){
+    if (S.total > 0) save("guess-wallet", getWallet() + S.total);
+    if (S.mode !== "group" && S.cur && S.cur.parts && !S.cur.saved) raise(S.sid, S.uid, S.cur.it.name, S.hard ? 2 : 1);
+    pushProgress();
+  }
+  home();
+  window.scrollTo(0, 0);
+}
+document.addEventListener("click", e => { if (e.target.closest("#quit")) quit(); });
+
+home();
+</script>
+</body>
+</html>
