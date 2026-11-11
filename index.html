@@ -104,8 +104,9 @@ td:last-child{text-align:right;font-weight:700;color:var(--gold)}
 .rank.me{color:var(--primary);font-weight:700}
 .field{display:block;margin:12px 0}
 .field span{display:block;font-size:14px;color:var(--muted);margin-bottom:4px}
-.field input{width:100%;font:inherit;padding:10px 12px;border:1px solid var(--edge);border-radius:10px;background:var(--card);color:var(--ink)}
-.field input:focus{outline:none;border-color:var(--primary)}
+.field input,.field textarea{width:100%;font:inherit;padding:10px 12px;border:1px solid var(--edge);border-radius:10px;background:var(--card);color:var(--ink)}
+.field textarea{resize:vertical}
+.field input:focus,.field textarea:focus{outline:none;border-color:var(--primary)}
 .err{color:var(--bad);font-size:14px;min-height:20px;margin-top:6px}
 .avas{display:flex;gap:8px;flex-wrap:wrap}
 .avas button{width:44px;height:44px;border-radius:50%;font-size:20px;padding:0}
@@ -152,6 +153,9 @@ function registerSubject(id, def){ SUBJECTS[id] = def; }
 // 雲端存檔設定：把 Google Apps Script 部署後拿到的網址貼在下面的引號裡。
 // 留空白就不開啟登入，成績只存在學生自己的瀏覽器。
 const CLOUD_URL = "";
+// 匿名紀錄與回饋：貼上同一個 Apps Script 網址就會開啟。學生不用登入，
+// 每玩完一局匿名記一列（裝置代號、單元、關卡、分數），首頁和結算頁會出現「給老師的回饋」。
+const LOG_URL = "https://script.google.com/macros/s/AKfycbw2sIvucY47JIodQ94R9pXWAMZIRqq1rLlEhlXlSJnlZP9UdI2tZYk0mEj3mkJznBSF/exec";
 </script>
 <!-- ===== 題目資料：之後新增科目，就在下面再加一段 registerSubject(...) ===== -->
 <script>
@@ -3354,6 +3358,71 @@ async function loadRank(){
   } catch(e){ box.innerHTML = `<p class="muted">排行榜暫時載入不了，等一下再看看。</p>`; }
 }
 
+// ---------- 匿名紀錄與回饋（不需登入） ----------
+const logOn = () => typeof LOG_URL === "string" && LOG_URL.startsWith("https://");
+// 每台裝置一個隨機代號，只用來分辨「同一台裝置玩的」，不知道是誰
+function deviceId(){
+  let d = load("guess-device", "");
+  if (!d){ d = Math.random().toString(36).slice(2, 8).toUpperCase(); save("guess-device", d); }
+  return d;
+}
+// 先放進待送清單，再整批送出；沒網路時留著，下次玩完再補送
+async function flushLogs(){
+  const q = load("guess-logq", []);
+  if (!logOn() || !q.length) return;
+  try {
+    const r = await (await fetch(LOG_URL, { method: "POST", body: JSON.stringify({ action: "log", rows: q }) })).json();
+    if (r.ok) save("guess-logq", load("guess-logq", []).slice(q.length));
+  } catch(e){}
+}
+function logRound(){
+  if (!logOn()) return;
+  const quiz = isQuiz(), right = S.log.filter(l => quiz ? l.ok : !l.skipped).length;
+  const row = { t: new Date().toISOString(), dev: deviceId(), subject: S.sub.name, unit: S.u.name, mode: modeLabel(),
+    n: S.log.length, right, clean: quiz ? "" : S.log.filter(l => !l.skipped && !l.hints).length, score: S.total,
+    note: isTeacher() ? "老師試玩" : "" };
+  save("guess-logq", load("guess-logq", []).concat([row]).slice(-50));
+  flushLogs();
+}
+const FEEDBACK_PARTS = ["學習卡片", "一般關", "困難模式", "肌群關", "地標關"];
+function feedbackPage(back){
+  let rate = 0, part = "";
+  app.innerHTML = `
+    <h1>💬 給老師的回饋</h1>
+    <p class="muted">不記名，不會記錄姓名或學號。每一則老師都會看，謝謝你！</p>
+    <div class="card">
+      <p style="font-weight:700">這個遊戲對你記肌肉有幫助嗎？</p>
+      <div class="row" id="frate">${[1, 2, 3, 4, 5].map(n => `<button data-v="${n}">${n}</button>`).join("")}</div>
+      <p class="muted" style="font-size:13px">1 完全沒幫助 ～ 5 非常有幫助</p>
+      <p style="font-weight:700;margin-top:14px">哪個部分最有幫助？</p>
+      <div class="row" id="fpart">${FEEDBACK_PARTS.map(p => `<button data-v="${p}">${p}</button>`).join("")}</div>
+      <label class="field"><span>想說的話（建議、發現的錯誤、希望增加的內容都可以）</span>
+        <textarea id="ftext" maxlength="500" rows="4"></textarea></label>
+      <div class="err" id="ferr"></div>
+      <div class="row" style="margin-top:8px"><button class="primary" id="fgo">送出</button><button id="fback">返回</button></div>
+    </div>`;
+  const pickOne = (box, set) => box.querySelectorAll("button").forEach(b => b.onclick = () => {
+    set(b.dataset.v); box.querySelectorAll("button").forEach(x => x.classList.toggle("primary", x === b));
+  });
+  pickOne(document.getElementById("frate"), v => rate = +v);
+  pickOne(document.getElementById("fpart"), v => part = v);
+  document.getElementById("fback").onclick = back;
+  document.getElementById("fgo").onclick = async () => {
+    const text = document.getElementById("ftext").value.trim(), err = document.getElementById("ferr");
+    if (!rate && !part && !text){ err.textContent = "至少選一個或寫一句話再送出喔"; return; }
+    err.textContent = "送出中…";
+    try {
+      const r = await (await fetch(LOG_URL, { method: "POST", body: JSON.stringify({ action: "feedback",
+        dev: deviceId(), rate, part, text, note: isTeacher() ? "老師試玩" : "" }) })).json();
+      if (!r.ok) throw 0;
+      app.innerHTML = `<h1>💬 收到了，謝謝你！</h1><p class="muted">你的回饋會幫助這個遊戲變得更好。</p>
+        <div class="row"><button class="primary" id="fdone">返回</button></div>`;
+      document.getElementById("fdone").onclick = back;
+      launch(2);
+    } catch(e){ err.textContent = "暫時送不出去，請確認網路後再試一次"; }
+  };
+}
+
 // ---------- 登入頁 ----------
 function loginPage(back){
   let register = false, avatar = AVATARS[0];
@@ -3488,7 +3557,9 @@ function home(){
       <b>怎麼玩</b>：每個單元先看「學習卡片」把正確內容看熟，再去挑戰：看線索猜答案，猜中後還有加碼挑戰。越不熟的越常出現，玩著玩著就記起來了。<br>
       <b>印章</b>：🥉 猜中一次　🥈 加碼挑戰也全對　🥇 在困難模式也過關。所有關卡一開始就全部開放，想從哪裡玩都可以。<br>
       <b>計分</b>：猜對 +${BASE}；每少用一個提示 +${PER_UNUSED_HINT}；一次命中 +${FIRST_TRY}；加碼挑戰每題 +${BONUS}；連續答對有連擊加分。猜錯和換題都不扣分。
+      ${logOn() ? `<br><b>匿名紀錄</b>：每玩完一局，遊戲會匿名記下單元、關卡和分數，讓老師了解大家的複習情況；不會記錄姓名或學號。` : ""}
     </div>
+    ${logOn() ? `<div class="row" style="justify-content:center"><button id="fbOpen">💬 給老師的回饋</button></div>` : ""}
     ${PLANNED.filter(([sid]) => !SUBJECTS[sid]).map(([, name, icon]) => `<div class="soon">${icon} ${name}・即將推出</div>`).join("")}
     <div class="teacher">${isTeacher()
       ? `<span>🔧 老師試玩模式開啟中：每局只出 3 題，成績不會上傳雲端</span> <button id="tOff">關閉試玩模式</button>`
@@ -3503,6 +3574,8 @@ function home(){
     };
   }
   if (tOff) tOff.onclick = () => { save("guess-teacher", false); home(); };
+  const fb = document.getElementById("fbOpen");
+  if (fb) fb.onclick = () => feedbackPage(home);
   app.querySelectorAll(".urow button").forEach(b => b.onclick = () => unitPage(b.dataset.s, b.dataset.u));
   loadRank();
 }
@@ -3736,12 +3809,16 @@ function finish(){
       <table>${S.log.map(l => `<tr><td>${l.name}</td><td class="muted">${isQuiz() ? (l.ok ? "答對 ✨" : "看了答案") : l.skipped ? "換過題" : `${l.hints ? `用了 ${l.hints} 個提示` : "零提示 ✨"}${l.bonus ? `・加碼 ${l.bonus}` : ""}`}</td><td>${l.pts ? "+" + l.pts : "—"}</td></tr>`).join("")}</table>
     </div>
     ${later.length ? `<div class="card"><h2>下次再挑戰 💪</h2><p>${later.map(l => l.name).join("、")}</p><p class="muted">去「學習卡片」再看一次，下一局一定能秒殺！</p></div>` : `<div class="card"><h2>全部輕鬆過關！🏆</h2><p class="muted">太強了！試試困難模式或${sub.fields[sub.groupField].label}關，把印章升到金章！</p></div>`}
-    <div class="row"><button class="primary" id="again">再玩一次</button><button id="dexb">📘 學習卡片</button><button id="unitb">回單元</button><button id="home">回首頁</button></div>`;
+    <div class="row"><button class="primary" id="again">再玩一次</button><button id="dexb">📘 學習卡片</button><button id="unitb">回單元</button><button id="home">回首頁</button></div>
+    ${logOn() ? `<p class="muted" style="margin-top:14px">覺得這個遊戲有沒有幫助？<button class="linkbtn" id="fbEnd">💬 給老師回饋</button></p>` : ""}`;
+  logRound();
   const sid = S.sid, uid = S.uid, mode = S.mode;
   document.getElementById("again").onclick = () => mode === "landmark" ? startLandmark(sid, uid) : mode === "group" ? startGroup(sid, uid) : start(sid, uid, mode === "hard");
   document.getElementById("dexb").onclick = () => study(sid, uid);
   document.getElementById("unitb").onclick = () => unitPage(sid, uid);
   document.getElementById("home").onclick = home;
+  const fbEnd = document.getElementById("fbEnd");
+  if (fbEnd) fbEnd.onclick = () => feedbackPage(() => unitPage(sid, uid));
   if (askSave){
     document.getElementById("savego").onclick = () => loginPage(home);
     document.getElementById("savelater").onclick = e => e.target.closest(".savebox").remove();
